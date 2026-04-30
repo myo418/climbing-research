@@ -1,5 +1,5 @@
 ---
-title: ---
+title: takara
 role:
 met_at:
 age:
