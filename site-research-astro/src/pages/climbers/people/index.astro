@@ -1,0 +1,40 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import ClimberCard from '../../../components/ClimberCard.astro';
+import { pages, getPageById } from '../../../lib/pages';
+import { url } from '../../../lib/url';
+
+const indexPage = getPageById('climbers/people');
+const title = indexPage?.frontmatter?.title ?? '出会った人々';
+const IndexContent = indexPage?.Content;
+
+const people = pages
+  .filter((p) => p.id.startsWith('climbers/people/'))
+  .map((p) => {
+    const fm = p.frontmatter ?? {};
+    return {
+      id: p.id,
+      title: (fm.title ?? p.id) as string,
+      subtitle: (fm.role ?? fm.met_at) as string | undefined,
+      image: fm.image as string | undefined,
+    };
+  });
+---
+
+<Layout title={title}>
+  {IndexContent && <IndexContent />}
+  <div class="grid">
+    {people.map((c) => (
+      <ClimberCard href={url(`/${c.id}/`)} name={c.title} subtitle={c.subtitle} image={c.image ? url(c.image) : c.image} />
+    ))}
+  </div>
+</Layout>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+</style>

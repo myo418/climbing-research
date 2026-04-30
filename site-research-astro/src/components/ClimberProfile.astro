@@ -31,6 +31,13 @@ interface Props {
   sponsors?: string[];
   links?: LinkMap;
   researchRelevance?: string;
+  // people 用（記事に登場する身近なクライマー）
+  metAt?: string;
+  age?: string | number;
+  homeGym?: string;
+  gyms?: string[];
+  grade?: string;
+  appearances?: { id: string; title: string }[];
 }
 
 const p = Astro.props;
@@ -50,6 +57,8 @@ function fmt(v: unknown): string | undefined {
 const heightStr = fmt(p.height);
 const weightStr = fmt(p.weight);
 const careerStr = fmt(p.careerStart);
+const ageStr = fmt(p.age);
+const gradeStr = fmt(p.grade);
 
 const linkEntries = p.links
   ? (Object.entries(p.links).filter(([, v]) => Boolean(v)) as [string, string][])
@@ -86,9 +95,16 @@ const linkLabel: Record<string, string> = {
       {p.hometown && <><dt>出身</dt><dd>{p.hometown}</dd></>}
       {p.nationality && <><dt>国籍</dt><dd>{p.nationality}</dd></>}
       {statusText && <><dt>状態</dt><dd>{statusText}</dd></>}
+      {ageStr && <><dt>年齢</dt><dd>{ageStr}</dd></>}
+      {p.metAt && <><dt>出会った場所</dt><dd>{p.metAt}</dd></>}
+      {p.homeGym && <><dt>ホームジム</dt><dd>{p.homeGym}</dd></>}
+      {p.gyms && p.gyms.length > 0 && (
+        <><dt>よく登るジム</dt><dd>{p.gyms.join('、')}</dd></>
+      )}
       {p.disciplines && p.disciplines.length > 0 && (
         <><dt>専門</dt><dd>{p.disciplines.join('、')}</dd></>
       )}
+      {gradeStr && <><dt>グレード</dt><dd>{gradeStr}</dd></>}
       {careerStr && <><dt>キャリア開始</dt><dd>{careerStr}</dd></>}
       {heightStr && <><dt>身長</dt><dd>{heightStr}</dd></>}
       {weightStr && <><dt>体重</dt><dd>{weightStr}</dd></>}
@@ -136,6 +152,16 @@ const linkLabel: Record<string, string> = {
             </>
           ))}
         </p>
+      </section>
+    )}
+    {p.appearances && p.appearances.length > 0 && (
+      <section>
+        <h3>登場する記事</h3>
+        <ul>
+          {p.appearances.map((a) => (
+            <li><a href={`/${a.id}/`}>{a.title}</a></li>
+          ))}
+        </ul>
       </section>
     )}
     {p.researchRelevance && (

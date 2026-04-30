@@ -1,12 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ClimberProfile from '../components/ClimberProfile.astro';
-import { pages } from '../lib/pages';
+import { pages, getPageById } from '../lib/pages';
 import { url } from '../lib/url';
 
 export function getStaticPaths() {
   // Pages rendered by a dedicated .astro file (not via this catch-all).
-  const customRoutes = new Set(['climbers/famous', 'basics/glossary']);
+  const customRoutes = new Set(['climbers/famous', 'climbers/people', 'basics/glossary']);
   return pages
     .filter((p) => p.id !== 'index' && !customRoutes.has(p.id))
     .map((p) => ({
@@ -19,7 +19,9 @@ const { page } = Astro.props;
 const title = page.frontmatter?.title ?? page.id.split('/').pop() ?? page.id;
 const Content = page.Content;
 const fm = page.frontmatter ?? {};
-const isClimber = page.id.startsWith('climbers/famous/');
+const isClimber =
+  page.id.startsWith('climbers/famous/') ||
+  page.id.startsWith('climbers/people/');
 
 // YAML parses YYYY-MM-DD strings as Date objects; normalize back to YYYY-MM-DD.
 function dateStr(v: unknown): string | undefined {
@@ -28,6 +30,14 @@ function dateStr(v: unknown): string | undefined {
   const m = s.match(/^\d{4}-\d{2}-\d{2}/);
   return m ? m[0] : s;
 }
+
+// Resolve `appearances: [<page id>, ...]` into { id, title } using each page's frontmatter title.
+const appearances: { id: string; title: string }[] | undefined = Array.isArray(fm.appearances)
+  ? (fm.appearances as string[]).map((id) => ({
+      id,
+      title: getPageById(id)?.frontmatter?.title ?? id,
+    }))
+  : undefined;
 ---
 
 <Layout title={title}>
@@ -56,6 +66,12 @@ function dateStr(v: unknown): string | undefined {
       sponsors={fm.sponsors}
       links={fm.links}
       researchRelevance={fm.research_relevance}
+      metAt={fm.met_at}
+      age={fm.age}
+      homeGym={fm.home_gym}
+      gyms={fm.gyms}
+      grade={fm.grade}
+      appearances={appearances}
     />
   )}
   <Content />

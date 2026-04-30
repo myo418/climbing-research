@@ -48,3 +48,16 @@
 - `private: true` — サイトから完全に除外（[src/lib/pages.ts](src/lib/pages.ts) の `isExcluded`）。
 - `section: meta` — トップレベルのときだけ意味があり、サイドバーで仕切り線の下に置かれる。
 - `reverseSort: true` — そのディレクトリの `index.md` に付けると、サイドバーで子の並び順を名前の降順にする（[src/components/tree.ts](src/components/tree.ts) の `sortChildren`）。日付名の週次レポートなど、新しいものを上に出したいときに使う。
+
+## md 内のリンク
+
+`astro.config.mjs` で `base: '/climbing-research'` を設定しているが、md 内のリンクには Astro が自動でプレフィックスを付けない。そのままだと `[れな](/climbers/people/rena/)` のような絶対パスが切れる。
+
+これを解消するため、自前の remark プラグイン（[astro.config.mjs](astro.config.mjs) の `remarkBasePath`）が、md と mdx の `link` / `image` ノードのうち `/` で始まるパスに自動で `BASE` を前置する。
+
+執筆時のルール:
+
+- **同一サイト内のリンクは絶対パスで書く**: `[れな](/climbers/people/rena/)`
+- 相対パス（`./foo/`, `../bar/`）も使えるが、ファイル移動に弱いので推奨しない
+- 外部URL（`https://...`）や `//` で始まる scheme-relative URL は触らない
+- 画像も同じ扱い（`/foo.png` は `BASE/foo.png` に変換される。同フォルダ内画像は `./foo.png` で書く）
