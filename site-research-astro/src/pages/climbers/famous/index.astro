@@ -1,0 +1,69 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import ClimberCard from '../../../components/ClimberCard.astro';
+import { pages, getPageById } from '../../../lib/pages';
+import { url } from '../../../lib/url';
+
+const indexPage = getPageById('climbers/famous');
+const title = indexPage?.frontmatter?.title ?? '有名クライマー';
+
+const climbers = pages
+  .filter((p) => p.id.startsWith('climbers/famous/'))
+  .map((p) => {
+    const fm = p.frontmatter ?? {};
+    const nationality = fm.nationality as string | undefined;
+    // JP: ふりがな (reading). 外国: native 表記 (name_en).
+    const subtitle = (nationality === '日本' ? fm.reading : fm.name_en) as string | undefined;
+    return {
+      id: p.id,
+      title: (fm.title ?? p.id) as string,
+      subtitle,
+      nationality,
+      image: fm.image as string | undefined,
+      status: fm.status as string | undefined,
+    };
+  });
+
+const groups = [
+  { label: '日本', items: climbers.filter((c) => c.nationality === '日本') },
+  { label: '海外（現役）', items: climbers.filter((c) => c.nationality !== '日本' && c.status === 'active') },
+  { label: '海外（レジェンド）', items: climbers.filter((c) => c.nationality !== '日本' && c.status !== 'active') },
+];
+---
+
+<Layout title={title}>
+  <h1>{title}</h1>
+  {groups.map((group) => (
+    group.items.length > 0 && (
+      <section>
+        <h2>{group.label}</h2>
+        <div class="grid">
+          {group.items.map((c) => (
+            <ClimberCard href={url(`/${c.id}/`)} name={c.title} subtitle={c.subtitle} nationality={c.nationality} image={c.image ? url(c.image) : c.image} />
+          ))}
+        </div>
+      </section>
+    )
+  ))}
+</Layout>
+
+<style>
+  h1 {
+    margin: 0 0 24px;
+  }
+  h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 32px 0 12px;
+    letter-spacing: 0.02em;
+  }
+  section:first-of-type h2 {
+    margin-top: 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+</style>

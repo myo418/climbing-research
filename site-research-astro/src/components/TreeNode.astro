@@ -1,0 +1,55 @@
+---
+import type { Node } from './tree';
+import { sortChildren } from './tree';
+import { url } from '../lib/url';
+
+interface Props {
+  node: Node;
+}
+
+const { node } = Astro.props;
+const children = sortChildren(node);
+---
+
+<ul>
+  {children.map((child) => {
+    const label = child.title ?? child.name;
+    const hasChildren = child.children.size > 0;
+    if (child.entryId !== undefined && !hasChildren) {
+      if (child.draft) {
+        return (
+          <li>
+            <span class="page draft">{label}</span>
+          </li>
+        );
+      }
+      return (
+        <li>
+          <a class="page" href={url(`/${child.entryId}/`)}>{label}</a>
+        </li>
+      );
+    }
+    if (child.entryId !== undefined && hasChildren) {
+      if (child.draft) {
+        return (
+          <li>
+            <span class="dir-name draft">{label}</span>
+            <Astro.self node={child} />
+          </li>
+        );
+      }
+      return (
+        <li>
+          <a class="dir-name dir-link" href={url(`/${child.entryId}/`)}>{label}</a>
+          <Astro.self node={child} />
+        </li>
+      );
+    }
+    return (
+      <li>
+        <span class="dir-name">{label}</span>
+        <Astro.self node={child} />
+      </li>
+    );
+  })}
+</ul>

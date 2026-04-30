@@ -1,0 +1,74 @@
+.tategumi {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+  font-size: 15px;
+  line-height: 2;
+  height: 72vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 24px 0;
+  margin-bottom: 40px;
+  border-block: 1px solid var(--border);
+  line-break: strict;
+  word-break: keep-all;
+}
+
+.tategumi :global(h1) {
+  font-weight: 500;
+  font-size: 22px;
+  margin: 0 32px 0 0;
+  border: none;
+  padding: 0;
+}
+
+.tategumi :global(h2) {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 40px 24px 12px 0;
+  border: none;
+  border-inline-start: 2px solid currentColor;
+  padding-inline-start: 8px;
+  padding-bottom: 0;
+}
+
+.tategumi :global(h3) {
+  font-size: 15px;
+  margin: 24px 16px 8px 0;
+  font-weight: 600;
+}
+
+.tategumi :global(p) {
+  margin: 0 1.2em;
+}
+
+.tategumi :global(ul),
+.tategumi :global(ol) {
+  margin: 0 1.2em;
+  padding: 1em 0 0 0;
+  list-style-position: inside;
+}
+
+.tategumi :global(li) {
+  margin: 0.2em 0;
+}
+
+.tategumi :global(a) {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.tategumi :global(hr) {
+  display: none;
+}
+
+.tategumi :global(strong) {
+  font-weight: 700;
+}
+
+.tategumi :global(code) {
+  writing-mode: horizontal-tb;
+  display: inline-block;
+  vertical-align: middle;
+}

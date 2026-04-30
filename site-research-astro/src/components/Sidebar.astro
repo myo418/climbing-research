@@ -1,0 +1,126 @@
+---
+import TreeNode from './TreeNode.astro';
+import type { Node } from './tree';
+import { pages } from '../lib/pages';
+import { url } from '../lib/url';
+
+// A top-level section is "meta" if its index md has `section: meta`
+// in frontmatter. Meta sections are rendered below a divider.
+const metaTops = new Set<string>();
+for (const page of pages) {
+  const top = page.id.split('/')[0];
+  if (page.frontmatter?.section === 'meta') metaTops.add(top);
+}
+
+const main: Node = { name: '', path: '', children: new Map() };
+const meta: Node = { name: '', path: '', children: new Map() };
+
+for (const page of pages) {
+  if (page.id === 'index') continue;
+  const parts = page.id.split('/');
+  const root = metaTops.has(parts[0]) ? meta : main;
+  let node: Node = root;
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    const isLeaf = i === parts.length - 1;
+    if (!node.children.has(part)) {
+      node.children.set(part, {
+        name: part,
+        path: parts.slice(0, i + 1).join('/'),
+        children: new Map(),
+      });
+    }
+    node = node.children.get(part)!;
+    if (isLeaf) {
+      node.entryId = page.id;
+      node.title = page.frontmatter?.title;
+      node.order = page.frontmatter?.order;
+      node.draft = page.frontmatter?.draft === true;
+      node.reverseSort = page.frontmatter?.reverseSort === true;
+    }
+  }
+}
+
+// Sidebar only shows 2 levels (top-level + their direct children).
+// Anything deeper is reachable from the parent's index page.
+const MAX_DEPTH = 2;
+function prune(node: Node, depth: number) {
+  if (depth >= MAX_DEPTH) {
+    node.children.clear();
+    return;
+  }
+  for (const child of node.children.values()) prune(child, depth + 1);
+}
+prune(main, 0);
+prune(meta, 0);
+
+const hasMeta = meta.children.size > 0;
+---
+
+<nav>
+  <a href={url('/')} class="home">クライミングのリサーチ</a>
+  <TreeNode node={main} />
+  {hasMeta && <hr class="divider" />}
+  {hasMeta && <TreeNode node={meta} />}
+</nav>
+
+<style>
+  nav {
+    font-size: 13px;
+  }
+  .home {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--fg);
+    text-decoration: none;
+    padding: 4px 0 12px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  :global(nav ul) {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  :global(nav ul ul) {
+    padding-left: 12px;
+    margin: 2px 0;
+    border-left: 1px dashed var(--border);
+  }
+  :global(nav li) {
+    margin: 2px 0;
+  }
+  :global(nav a.page) {
+    color: var(--fg);
+    text-decoration: none;
+    display: block;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+  :global(nav a.page:hover) {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--link);
+  }
+  :global(nav .dir-name) {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 12px;
+    padding: 4px;
+    display: block;
+  }
+  :global(nav .page.draft),
+  :global(nav .dir-name.draft) {
+    color: var(--muted);
+    cursor: default;
+  }
+  :global(nav .page.draft) {
+    display: block;
+    padding: 2px 4px;
+  }
+  .divider {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 12px 0 8px;
+  }
+</style>

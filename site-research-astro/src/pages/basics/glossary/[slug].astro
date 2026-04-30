@@ -1,0 +1,164 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { terms } from '../../../data/glossary';
+import { url } from '../../../lib/url';
+
+export function getStaticPaths() {
+  return terms.map((t) => ({
+    params: { slug: t.slug },
+    props: { term: t },
+  }));
+}
+
+const { term } = Astro.props;
+const related = terms
+  .filter((t) => t.slug !== term.slug && t.tags.some((tag) => term.tags.includes(tag)))
+  .slice(0, 8);
+---
+
+<Layout title={term.term}>
+  <p class="breadcrumb">
+    <a href={url('/basics/glossary/')}>← 用語集</a>
+  </p>
+  <h1>
+    {term.term}
+    <span class="term-english">{term.english}</span>
+  </h1>
+  {term.aliases && term.aliases.length > 0 && (
+    <p class="aliases">別名: {term.aliases.join('・')}</p>
+  )}
+  <div class="tags">
+    {term.tags.map((tag) => (
+      <a href={url(`/basics/glossary/?tag=${encodeURIComponent(tag)}`)} class="tag">{tag}</a>
+    ))}
+  </div>
+  {term.image && (
+    <figure class="figure">
+      <img src={url(term.image)} alt={term.term} />
+      {term.imageCredit && <figcaption>画像: {term.imageCredit}</figcaption>}
+    </figure>
+  )}
+  <p class="description">{term.description}</p>
+
+  {related.length > 0 && (
+    <section class="related">
+      <h2>関連する用語</h2>
+      <ul>
+        {related.map((t) => (
+          <li>
+            <a href={url(`/basics/glossary/${t.slug}/`)} class="related-name">{t.term}</a>
+            <span class="related-tags">
+              {t.tags.map((tag) => <span class="related-tag">{tag}</span>)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</Layout>
+
+<style>
+  .breadcrumb {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    margin: 0 0 16px;
+  }
+  .breadcrumb a {
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .breadcrumb a:hover {
+    color: var(--fg);
+  }
+  .term-english {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 15px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--muted);
+    vertical-align: middle;
+  }
+  .aliases {
+    color: var(--muted);
+    font-size: 13px;
+    margin: -8px 0 16px;
+  }
+  .tags {
+    display: flex;
+    gap: 6px;
+    margin: 12px 0 24px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--sidebar-bg);
+    padding: 2px 10px;
+    border-radius: 2px;
+    text-decoration: none;
+  }
+  .tag:hover {
+    color: var(--fg);
+    background: var(--border);
+  }
+  .figure {
+    margin: 16px 0 24px;
+  }
+  .figure img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+  }
+  .figure figcaption {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .description {
+    font-size: 15px;
+    line-height: 1.9;
+    margin: 16px 0 40px;
+  }
+  .related {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .related h2 {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 12px;
+    border: none;
+    padding: 0;
+    font-weight: 600;
+  }
+  .related ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .related li {
+    padding: 8px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .related-name {
+    font-size: 14px;
+  }
+  .related-tags {
+    display: inline-flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .related-tag {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--sidebar-bg);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+</style>

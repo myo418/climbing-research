@@ -1,0 +1,287 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { terms, GLOSSARY_TAGS } from '../../../data/glossary';
+import { url } from '../../../lib/url';
+
+const sorted = [...terms].sort((a, b) => a.term.localeCompare(b.term, 'ja'));
+const tagCounts = new Map<string, number>();
+for (const t of terms) for (const tag of t.tags) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+---
+
+<Layout title="用語集">
+  <p class="breadcrumb">basics/glossary</p>
+  <h1>用語集</h1>
+  <p class="meta">{terms.length} 語</p>
+
+  <div class="controls">
+    <input
+      id="glossary-search"
+      type="search"
+      placeholder="キーワード検索（日本語・ひらがな・ローマ字・別名OK）"
+      autocomplete="off"
+    />
+    <div class="chips" id="tag-chips">
+      <button type="button" class="chip active" data-tag="">すべて（{terms.length}）</button>
+      {GLOSSARY_TAGS.map((tag) => (
+        <button type="button" class="chip" data-tag={tag}>{tag}（{tagCounts.get(tag) ?? 0}）</button>
+      ))}
+    </div>
+  </div>
+
+  <ul class="terms" id="terms">
+    {sorted.map((t) => (
+      <li
+        class="term"
+        data-term={t.term}
+        data-english={t.english}
+        data-reading={t.reading}
+        data-aliases={(t.aliases ?? []).join(' ')}
+        data-description={t.description}
+        data-tags={t.tags.join(' ')}
+      >
+        <a href={url(`/basics/glossary/${t.slug}/`)} class="term-thumb" aria-hidden="true" tabindex="-1">
+          {t.image ? (
+            <img src={url(t.image)} alt="" loading="lazy" />
+          ) : (
+            <span class="term-thumb-empty" />
+          )}
+        </a>
+        <div class="term-body">
+          <a href={url(`/basics/glossary/${t.slug}/`)} class="term-link">
+            <span class="term-name">{t.term}</span>
+            <span class="term-english">{t.english}</span>
+            {t.aliases && t.aliases.length > 0 && (
+              <span class="term-aliases">（{t.aliases.join('・')}）</span>
+            )}
+          </a>
+          <div class="term-tags">
+            {t.tags.map((tag) => <span class="term-tag">{tag}</span>)}
+          </div>
+          <p class="term-desc">{t.description}</p>
+        </div>
+      </li>
+    ))}
+  </ul>
+  <p class="empty" id="empty" hidden>該当する用語がありません</p>
+</Layout>
+
+<script>
+  const searchInput = document.getElementById('glossary-search') as HTMLInputElement;
+  const chipsContainer = document.getElementById('tag-chips')!;
+  const termsEl = document.getElementById('terms')!;
+  const emptyEl = document.getElementById('empty')!;
+  const termItems = Array.from(termsEl.querySelectorAll<HTMLElement>('.term'));
+
+  let activeTag = '';
+  let keyword = '';
+
+  // Normalize for case-insensitive match across hiragana/katakana/romaji.
+  function normalize(s: string): string {
+    return s
+      .toLowerCase()
+      .replace(/[ァ-ヶ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+  }
+
+  function matches(el: HTMLElement): boolean {
+    if (activeTag) {
+      const tags = (el.dataset.tags ?? '').split(' ').filter(Boolean);
+      if (!tags.includes(activeTag)) return false;
+    }
+    if (keyword) {
+      const hay = normalize(
+        [
+          el.dataset.term,
+          el.dataset.english,
+          el.dataset.reading,
+          el.dataset.aliases,
+          el.dataset.description,
+        ]
+          .filter(Boolean)
+          .join(' '),
+      );
+      if (!hay.includes(keyword)) return false;
+    }
+    return true;
+  }
+
+  function apply() {
+    let visible = 0;
+    for (const el of termItems) {
+      const show = matches(el);
+      el.hidden = !show;
+      if (show) visible++;
+    }
+    emptyEl.hidden = visible > 0;
+  }
+
+  searchInput.addEventListener('input', () => {
+    keyword = normalize(searchInput.value.trim());
+    apply();
+  });
+
+  chipsContainer.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.chip');
+    if (!btn) return;
+    chipsContainer.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
+    btn.classList.add('active');
+    activeTag = btn.dataset.tag ?? '';
+    apply();
+  });
+
+  // Honor ?tag=... from individual term pages.
+  const initialTag = new URLSearchParams(location.search).get('tag') ?? '';
+  if (initialTag) {
+    const target = chipsContainer.querySelector<HTMLButtonElement>(
+      `.chip[data-tag="${CSS.escape(initialTag)}"]`,
+    );
+    if (target) {
+      chipsContainer.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
+      target.classList.add('active');
+      activeTag = initialTag;
+      apply();
+    }
+  }
+</script>
+
+<style>
+  .breadcrumb {
+    color: var(--muted);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    margin: 0 0 16px;
+  }
+  .meta {
+    color: var(--muted);
+    font-size: 13px;
+    margin: -12px 0 24px;
+  }
+  .controls {
+    margin: 24px 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  #glossary-search {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    border-radius: 3px;
+    color: var(--fg);
+  }
+  #glossary-search:focus {
+    outline: none;
+    border-color: var(--fg);
+  }
+  .chips {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    font: inherit;
+    font-size: 12px;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    cursor: pointer;
+    border-radius: 999px;
+    line-height: 1.4;
+  }
+  .chip:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+  .chip.active {
+    background: var(--fg);
+    color: var(--bg);
+    border-color: var(--fg);
+  }
+  .terms {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .term {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .term:last-child {
+    border-bottom: none;
+  }
+  .term-thumb {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    display: block;
+    overflow: hidden;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+  }
+  .term-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .term-thumb-empty {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .term-body {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .term-link {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .term-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .term-english {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .term-aliases {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .term-tags {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
+  .term-tag {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--sidebar-bg);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+  .term-desc {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--fg);
+    line-height: 1.6;
+  }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 0;
+  }
+</style>

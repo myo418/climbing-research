@@ -1,6 +1,10 @@
+---
+template: tategumi
+---
+
 # top
 
-関連: [CLAUDE.md](../../CLAUDE.md) / [weekly-report](../weekly-report/weekly-report.md)
+関連: [CLAUDE.md](../CLAUDE.md) / [weekly-report](./weekly-report/weekly-report.md)
 
 ## このmdの役割
 
@@ -28,9 +32,9 @@
 
 （各テーマページへのリンクをここに並べる）
 
-- [climbing-and-injury](../../climbing-and-injury/climbing-and-injury.md) — 怪我の種類と発生経緯
-- [climbing-spot](../../climbing-spot/climbing-spot.md) — （未作成）
+- [climbing-and-injury](../climbing-and-injury/climbing-and-injury.md) — 怪我の種類と発生経緯
+- [climbing-spot](../climbing-spot/climbing-spot.md) — （未作成）
 
 ## 最近の更新
 
-[weekly-report](../weekly-report/weekly-report.md) を参照。
+[weekly-report](./weekly-report/weekly-report.md) を参照。

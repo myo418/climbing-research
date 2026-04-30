@@ -1,6 +1,8 @@
-# climbing-and-injury
+---
+title: クライミングと怪我
+---
 
-関連: [CLAUDE.md](../CLAUDE.md)
+# クライミングと怪我
 
 ## このmdの目的
 

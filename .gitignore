@@ -12,3 +12,11 @@
 
 # Claude Code
 .claude/
+
+# Node / Astro
+node_modules/
+dist/
+.astro/
+.env
+.env.local
+.vercel/

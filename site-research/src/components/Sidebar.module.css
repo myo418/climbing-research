@@ -1,0 +1,51 @@
+.sidebar {
+  font-size: 13px;
+}
+
+.home {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--fg);
+  text-decoration: none;
+  padding: 4px 0 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar :global(ul) {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar :global(ul ul) {
+  padding-left: 12px;
+  margin: 2px 0;
+  border-left: 1px dashed var(--border);
+}
+
+.sidebar :global(li) {
+  margin: 2px 0;
+}
+
+.sidebar :global(a.page) {
+  color: var(--fg);
+  text-decoration: none;
+  display: block;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.sidebar :global(a.page:hover) {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--link);
+}
+
+.sidebar :global(.dirName) {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 4px;
+  display: block;
+}

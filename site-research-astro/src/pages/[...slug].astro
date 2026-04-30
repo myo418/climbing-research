@@ -1,0 +1,71 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ClimberProfile from '../components/ClimberProfile.astro';
+import { pages } from '../lib/pages';
+import { url } from '../lib/url';
+
+export function getStaticPaths() {
+  // Pages rendered by a dedicated .astro file (not via this catch-all).
+  const customRoutes = new Set(['climbers/famous', 'basics/glossary']);
+  return pages
+    .filter((p) => p.id !== 'index' && !customRoutes.has(p.id))
+    .map((p) => ({
+      params: { slug: p.id },
+      props: { page: p },
+    }));
+}
+
+const { page } = Astro.props;
+const title = page.frontmatter?.title ?? page.id.split('/').pop() ?? page.id;
+const Content = page.Content;
+const fm = page.frontmatter ?? {};
+const isClimber = page.id.startsWith('climbers/famous/');
+
+// YAML parses YYYY-MM-DD strings as Date objects; normalize back to YYYY-MM-DD.
+function dateStr(v: unknown): string | undefined {
+  if (!v) return undefined;
+  const s = v instanceof Date ? v.toISOString() : String(v);
+  const m = s.match(/^\d{4}-\d{2}-\d{2}/);
+  return m ? m[0] : s;
+}
+---
+
+<Layout title={title}>
+  <p class="breadcrumb">{page.id}.md</p>
+  {isClimber && (
+    <ClimberProfile
+      name={fm.title}
+      nameEn={fm.name_en}
+      birthdate={dateStr(fm.birthdate)}
+      death={dateStr(fm.death)}
+      hometown={fm.hometown}
+      nationality={fm.nationality}
+      status={fm.status}
+      disciplines={fm.disciplines}
+      careerStart={fm.career_start}
+      height={fm.height}
+      weight={fm.weight}
+      knownFor={fm.known_for}
+      quote={fm.quote}
+      image={fm.image ? url(fm.image) : fm.image}
+      imageSource={fm.image_source}
+      ascents={fm.ascents}
+      injuries={fm.injuries}
+      competitions={fm.competitions}
+      documentary={fm.documentary}
+      sponsors={fm.sponsors}
+      links={fm.links}
+      researchRelevance={fm.research_relevance}
+    />
+  )}
+  <Content />
+</Layout>
+
+<style>
+  .breadcrumb {
+    color: var(--muted);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    margin: 0 0 16px;
+  }
+</style>

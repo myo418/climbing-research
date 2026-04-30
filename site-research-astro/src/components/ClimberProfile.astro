@@ -1,0 +1,245 @@
+---
+interface LinkMap {
+  wikipedia?: string;
+  website?: string;
+  instagram?: string;
+  twitter?: string;
+  youtube?: string;
+  [key: string]: string | undefined;
+}
+
+interface Props {
+  name: string;
+  nameEn?: string;
+  birthdate?: string;
+  death?: string;
+  hometown?: string;
+  nationality?: string;
+  status?: string;
+  disciplines?: string[];
+  careerStart?: string | number;
+  height?: string | number;
+  weight?: string | number;
+  knownFor?: string;
+  quote?: string;
+  image?: string;
+  imageSource?: string;
+  ascents?: string[];
+  injuries?: string[];
+  competitions?: string[];
+  documentary?: string[];
+  sponsors?: string[];
+  links?: LinkMap;
+  researchRelevance?: string;
+}
+
+const p = Astro.props;
+const statusLabel: Record<string, string> = {
+  active: '現役',
+  legend: 'レジェンド',
+  deceased: '故人',
+};
+const statusText = p.status ? (statusLabel[p.status] ?? p.status) : undefined;
+
+function fmt(v: unknown): string | undefined {
+  if (v === undefined || v === null) return undefined;
+  const s = String(v).trim();
+  return s.length > 0 ? s : undefined;
+}
+
+const heightStr = fmt(p.height);
+const weightStr = fmt(p.weight);
+const careerStr = fmt(p.careerStart);
+
+const linkEntries = p.links
+  ? (Object.entries(p.links).filter(([, v]) => Boolean(v)) as [string, string][])
+  : [];
+const linkLabel: Record<string, string> = {
+  wikipedia: 'Wikipedia',
+  website: '公式サイト',
+  instagram: 'Instagram',
+  twitter: 'X',
+  youtube: 'YouTube',
+};
+---
+
+<aside class="profile">
+  {p.image && (
+    <div class="photo">
+      <img src={p.image} alt={p.name} />
+      {p.imageSource && <p class="src">画像: {p.imageSource}</p>}
+    </div>
+  )}
+  <div class="info">
+    <h1 class="name">
+      {p.name}
+      {p.nameEn && <span class="name-en">{p.nameEn}</span>}
+    </h1>
+    {p.knownFor && <p class="known-for">{p.knownFor}</p>}
+    <dl>
+      {p.birthdate && (
+        <>
+          <dt>生年月日</dt>
+          <dd>{p.birthdate}{p.death && ` – ${p.death}`}</dd>
+        </>
+      )}
+      {p.hometown && <><dt>出身</dt><dd>{p.hometown}</dd></>}
+      {p.nationality && <><dt>国籍</dt><dd>{p.nationality}</dd></>}
+      {statusText && <><dt>状態</dt><dd>{statusText}</dd></>}
+      {p.disciplines && p.disciplines.length > 0 && (
+        <><dt>専門</dt><dd>{p.disciplines.join('、')}</dd></>
+      )}
+      {careerStr && <><dt>キャリア開始</dt><dd>{careerStr}</dd></>}
+      {heightStr && <><dt>身長</dt><dd>{heightStr}</dd></>}
+      {weightStr && <><dt>体重</dt><dd>{weightStr}</dd></>}
+    </dl>
+    {p.quote && <blockquote class="quote">{p.quote}</blockquote>}
+
+    {p.ascents && p.ascents.length > 0 && (
+      <section>
+        <h3>完登した課題</h3>
+        <ul>{p.ascents.map((a) => <li>{a}</li>)}</ul>
+      </section>
+    )}
+    {p.injuries && p.injuries.length > 0 && (
+      <section>
+        <h3>怪我・手術歴</h3>
+        <ul>{p.injuries.map((i) => <li>{i}</li>)}</ul>
+      </section>
+    )}
+    {p.competitions && p.competitions.length > 0 && (
+      <section>
+        <h3>コンペの成績</h3>
+        <ul>{p.competitions.map((c) => <li>{c}</li>)}</ul>
+      </section>
+    )}
+    {p.documentary && p.documentary.length > 0 && (
+      <section>
+        <h3>関連ドキュメンタリー</h3>
+        <ul>{p.documentary.map((d) => <li>{d}</li>)}</ul>
+      </section>
+    )}
+    {p.sponsors && p.sponsors.length > 0 && (
+      <section>
+        <h3>スポンサー</h3>
+        <p class="inline">{p.sponsors.join('、')}</p>
+      </section>
+    )}
+    {linkEntries.length > 0 && (
+      <section>
+        <h3>リンク</h3>
+        <p class="links">
+          {linkEntries.map(([key, url], i) => (
+            <>
+              {i > 0 && <span class="sep"> / </span>}
+              <a href={url} target="_blank" rel="noopener noreferrer">{linkLabel[key] ?? key}</a>
+            </>
+          ))}
+        </p>
+      </section>
+    )}
+    {p.researchRelevance && (
+      <section>
+        <h3>このリサーチでの位置づけ</h3>
+        <p class="inline">{p.researchRelevance}</p>
+      </section>
+    )}
+  </div>
+</aside>
+
+<style>
+  .profile {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    margin: 0 0 24px;
+    padding: 0 0 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  @media (max-width: 640px) {
+    .profile {
+      grid-template-columns: 1fr;
+    }
+  }
+  .photo img {
+    width: 100%;
+    border-radius: 6px;
+    display: block;
+  }
+  .src {
+    margin: 6px 0 0;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .name {
+    margin: 0 0 4px;
+    font-size: 22px;
+    line-height: 1.3;
+  }
+  .name-en {
+    display: block;
+    font-size: 14px;
+    font-weight: normal;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .known-for {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    margin: 4px 0 14px;
+  }
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 12px;
+    row-gap: 4px;
+    margin: 0 0 8px;
+    font-size: 13px;
+  }
+  dt {
+    color: var(--muted);
+  }
+  dd {
+    margin: 0;
+  }
+  .quote {
+    border-left: 3px solid var(--border);
+    padding: 4px 0 4px 12px;
+    margin: 14px 0 6px;
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  section {
+    margin-top: 14px;
+  }
+  section h3 {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 4px;
+    font-weight: 600;
+  }
+  section ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+  }
+  section li {
+    margin-bottom: 2px;
+  }
+  .inline {
+    margin: 0;
+    font-size: 13px;
+  }
+  .links {
+    margin: 0;
+    font-size: 13px;
+  }
+  .links a {
+    color: var(--link);
+  }
+  .links .sep {
+    color: var(--muted);
+  }
+</style>
