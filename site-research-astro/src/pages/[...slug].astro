@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import ClimberProfile from '../components/ClimberProfile.astro';
 import { pages, getPageById } from '../lib/pages';
 import { url } from '../lib/url';
+import { getPeoplePortrait } from '../lib/portfolio-images';
 
 export function getStaticPaths() {
   // Pages rendered by a dedicated .astro file (not via this catch-all).
@@ -38,6 +39,14 @@ const appearances: { id: string; title: string }[] | undefined = Array.isArray(f
       title: getPageById(id)?.frontmatter?.title ?? id,
     }))
   : undefined;
+
+// Auto-pick `<slug>/portfolio.{png,jpg,jpeg,webp}` as the portrait when present;
+// falls back to frontmatter `image`.
+const peopleSlug = page.id.startsWith('climbers/people/')
+  ? page.id.slice('climbers/people/'.length)
+  : undefined;
+const portrait = peopleSlug ? getPeoplePortrait(peopleSlug) : undefined;
+const climberImage = portrait ?? (fm.image ? url(fm.image as string) : undefined);
 ---
 
 <Layout title={title}>
@@ -57,7 +66,7 @@ const appearances: { id: string; title: string }[] | undefined = Array.isArray(f
       weight={fm.weight}
       knownFor={fm.known_for}
       quote={fm.quote}
-      image={fm.image ? url(fm.image) : fm.image}
+      image={climberImage}
       imageSource={fm.image_source}
       ascents={fm.ascents}
       injuries={fm.injuries}

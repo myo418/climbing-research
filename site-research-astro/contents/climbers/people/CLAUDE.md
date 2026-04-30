@@ -15,7 +15,8 @@ contents/climbers/people/
 ```
 
 - slug は ASCII 小文字ハイフン（仮名でも OK: `rena`, `boss-yamada` など）
-- 画像を載せる場合は `public/people/<slug>.jpg` に置く（プライバシーに注意）
+- **サムネイル／プロフィール画像**は同じディレクトリに `portfolio.{png,jpg,jpeg,webp}` として置く。検出されると自動でカードと人物ページの両方で使われる（[src/lib/portfolio-images.ts](../../../src/lib/portfolio-images.ts)）。frontmatter の `image` は不要
+- frontmatter の `image: /...` は portfolio が無いときのフォールバック用。プライバシー OK な場合のみ
 
 ## frontmatter スキーマ
 

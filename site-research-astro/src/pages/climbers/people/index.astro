@@ -3,6 +3,7 @@ import Layout from '../../../layouts/Layout.astro';
 import ClimberCard from '../../../components/ClimberCard.astro';
 import { pages, getPageById } from '../../../lib/pages';
 import { url } from '../../../lib/url';
+import { getPeoplePortrait } from '../../../lib/portfolio-images';
 
 const indexPage = getPageById('climbers/people');
 const title = indexPage?.frontmatter?.title ?? '出会った人々';
@@ -12,11 +13,14 @@ const people = pages
   .filter((p) => p.id.startsWith('climbers/people/'))
   .map((p) => {
     const fm = p.frontmatter ?? {};
+    const slug = p.id.slice('climbers/people/'.length);
+    const portrait = getPeoplePortrait(slug);
+    const image = portrait ?? (fm.image ? url(fm.image as string) : undefined);
     return {
       id: p.id,
       title: (fm.title ?? p.id) as string,
       subtitle: (fm.role ?? fm.met_at) as string | undefined,
-      image: fm.image as string | undefined,
+      image,
     };
   });
 ---
@@ -25,7 +29,7 @@ const people = pages
   {IndexContent && <IndexContent />}
   <div class="grid">
     {people.map((c) => (
-      <ClimberCard href={url(`/${c.id}/`)} name={c.title} subtitle={c.subtitle} image={c.image ? url(c.image) : c.image} />
+      <ClimberCard href={url(`/${c.id}/`)} name={c.title} subtitle={c.subtitle} image={c.image} />
     ))}
   </div>
 </Layout>
