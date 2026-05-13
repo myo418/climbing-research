@@ -11,7 +11,7 @@ disciplines:
 known_for: 亡くなった旦那さんが立ち上げた小さなクライミングジム Isara を、ひとりで続けている
 quote: 向こうのほうがハマっちゃってるじゃん
 appearances:
-  - climbers/me/first-gym-visit
+  - climbers/me/01-first-gym-visit
 research_relevance: 自分が初めて訪れたジムのオーナー。「残された場所としてのジム」を考える起点になった人
 ---
 
