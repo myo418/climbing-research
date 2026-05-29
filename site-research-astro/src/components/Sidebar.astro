@@ -3,6 +3,7 @@ import TreeNode from './TreeNode.astro';
 import type { Node } from './tree';
 import { pages } from '../lib/pages';
 import { url } from '../lib/url';
+import { SITE_NAME } from '../lib/config';
 
 // A top-level section is "meta" if its index md has `section: meta`
 // in frontmatter. Meta sections are rendered below a divider.
@@ -58,7 +59,7 @@ const hasMeta = meta.children.size > 0;
 ---
 
 <nav>
-  <a href={url('/')} class="home">クライミングのリサーチ</a>
+  <a href={url('/')} class="home">{SITE_NAME}</a>
   <TreeNode node={main} />
   {hasMeta && <hr class="divider" />}
   {hasMeta && <TreeNode node={meta} />}
@@ -70,7 +71,8 @@ const hasMeta = meta.children.size > 0;
   }
   .home {
     display: block;
-    font-weight: 600;
+    font-family: var(--font-serif);
+    font-weight: 500;
     font-size: 14px;
     color: var(--fg);
     text-decoration: none;

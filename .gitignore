@@ -20,3 +20,5 @@ dist/
 .env
 .env.local
 .vercel/
+
+.playwright-mcp/

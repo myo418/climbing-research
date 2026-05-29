@@ -1,5 +1,6 @@
 ---
 import Sidebar from '../components/Sidebar.astro';
+import { SITE_NAME } from '../lib/config';
 
 interface Props {
   title: string;
@@ -14,7 +15,7 @@ const { title } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>{title} | リサーチサイト（内部）</title>
+    <title>{title} | {SITE_NAME}</title>
   </head>
   <body>
     <div class="app">
@@ -27,8 +28,27 @@ const { title } = Astro.props;
         </article>
       </main>
     </div>
+    <dialog id="img-dialog">
+      <img id="img-dialog-img" src="" alt="" />
+    </dialog>
   </body>
 </html>
+
+<script>
+  const dialog = document.getElementById('img-dialog') as HTMLDialogElement;
+  const dialogImg = document.getElementById('img-dialog-img') as HTMLImageElement;
+
+  document.querySelectorAll('.image-scroll img').forEach((img) => {
+    (img as HTMLImageElement).style.cursor = 'zoom-in';
+    img.addEventListener('click', () => {
+      dialogImg.src = (img as HTMLImageElement).src;
+      dialogImg.alt = (img as HTMLImageElement).alt;
+      dialog.showModal();
+    });
+  });
+
+  dialog.addEventListener('click', () => dialog.close());
+</script>
 
 <style is:global>
   :root {
@@ -41,6 +61,7 @@ const { title } = Astro.props;
     --sidebar-bg: #f2f1ec;
     --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --font-serif: "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
   }
 
   * {
@@ -75,7 +96,11 @@ const { title } = Astro.props;
 
   .main {
     padding: 48px 56px;
-    max-width: 820px;
+    min-width: 0;
+  }
+
+  .prose {
+    max-width: 708px;
   }
 
   .prose a {
@@ -105,6 +130,7 @@ const { title } = Astro.props;
   }
   .prose p {
     margin: 12px 0;
+    font-size: 14px;
   }
   .prose ul, .prose ol {
     margin: 12px 0;
@@ -187,6 +213,45 @@ const { title } = Astro.props;
   .prose .image-small img {
     max-width: 25%;
   }
+  .prose .image-scroll {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    overflow-x: auto;
+    margin: 16px 0 16px -56px;
+    padding: 0 56px;
+    width: calc(100vw - 280px);
+    max-width: none;
+    scrollbar-width: thin;
+  }
+  .prose .image-scroll > p {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+  .prose .image-scroll img {
+    height: 420px;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    border: none;
+    display: block;
+    border-radius: 2px;
+  }
+  .prose .video-embed {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  .prose .video-embed iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
   .prose table {
     border-collapse: collapse;
     margin: 16px 0;
@@ -199,6 +264,148 @@ const { title } = Astro.props;
   }
   .prose th {
     background: #ebeae5;
+  }
+
+  /* 会話例リスト */
+  .prose .phrase-section h2 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    border-bottom: none;
+    padding-bottom: 0;
+    margin: 40px 0 8px;
+  }
+  .prose .phrase-section h3 {
+    font-size: 20px;
+    font-weight: 400;
+    margin: 10px 0 0;
+    line-height: 1.4;
+    padding: 14px 18px 12px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .prose .phrase-section h3:has(+ p) {
+    border-radius: 6px 6px 0 0;
+    border-bottom: none;
+  }
+  .prose .phrase-section h3 + p {
+    margin: 0 0 4px;
+    padding: 4px 18px 14px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .prose .phrase-section .easy,
+  .prose .phrase-section .normal,
+  .prose .phrase-section .hard {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .prose .phrase-section .easy   { background: #dff0df; color: #2a6b2a; border: 1px solid #b5d9b5; }
+  .prose .phrase-section .normal { background: #f5ead4; color: #7a5200; border: 1px solid #e0cc99; }
+  .prose .phrase-section .hard   { background: #f5dede; color: #8b2020; border: 1px solid #e0b0b0; }
+
+  /* 一問一答レイアウト */
+  .prose .qa-section h1 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 40px 0 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+  }
+  .prose .qa-section h2 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    border-bottom: none;
+    padding-bottom: 0;
+    margin: 32px 0 4px;
+  }
+  .prose .qa-section h3 {
+    font-size: 13px;
+    font-weight: normal;
+    color: var(--muted);
+    margin: 14px 0 2px;
+    line-height: 1.5;
+  }
+  .prose .qa-section h3 + p {
+    margin-top: 2px;
+    font-weight: 500;
+  }
+  .prose .qa-section hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0 0;
+  }
+  .prose .qa-section ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    padding: 0;
+    margin: 4px 0 0;
+  }
+  .prose .qa-section ul li {
+    background: var(--bg-subtle, #f0efe9);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .prose ol.q-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 8px;
+    counter-reset: q-num;
+  }
+  .prose ol.q-list[start='7']  { counter-reset: q-num 6;  }
+  .prose ol.q-list[start='11'] { counter-reset: q-num 10; }
+  .prose ol.q-list[start='15'] { counter-reset: q-num 14; }
+  .prose ol.q-list[start='19'] { counter-reset: q-num 18; }
+  .prose ol.q-list[start='24'] { counter-reset: q-num 23; }
+  .prose ol.q-list[start='28'] { counter-reset: q-num 27; }
+  .prose ol.q-list li {
+    counter-increment: q-num;
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 0 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    margin: 0;
+    line-height: 1.6;
+  }
+  .prose ol.q-list li:first-child {
+    border-top: 1px solid var(--border);
+  }
+  .prose ol.q-list li::before {
+    content: counter(q-num);
+    color: var(--muted);
+    font-size: 12px;
+    text-align: right;
+    padding-top: 3px;
+    font-variant-numeric: tabular-nums;
   }
 
   @media (max-width: 800px) {
@@ -214,5 +421,25 @@ const { title } = Astro.props;
     .main {
       padding: 24px;
     }
+  }
+
+  #img-dialog {
+    border: none;
+    background: transparent;
+    padding: 0;
+    max-width: 100vw;
+    max-height: 100vh;
+  }
+  #img-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.85);
+    cursor: zoom-out;
+  }
+  #img-dialog img {
+    max-width: 90vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    display: block;
+    border-radius: 2px;
   }
 </style>

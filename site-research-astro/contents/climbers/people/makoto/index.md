@@ -1,14 +1,9 @@
 ---
-title: makoto
-role:
-met_at:
-age:
-home_gym:
-gyms:
+title: 佐藤真
+role: クライミング仲間
+met_at: 荻窪 B-Pump
 disciplines:
-grade:
-known_for:
+  - ボルダー
 appearances:
-research_relevance:
+  - climbers/me/05-lab-junior-2
 ---
-

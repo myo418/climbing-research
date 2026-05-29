@@ -40,6 +40,22 @@ const related = terms
   )}
   <p class="description">{term.description}</p>
 
+  {term.videos && term.videos.length > 0 && (
+    <section class="videos">
+      <h2>解説動画</h2>
+      {term.videos.map((v) => (
+        <p class="video-title">{v.title}</p>
+        <div class="video-embed">
+          <iframe
+            src={`https://www.youtube.com/embed/${v.youtubeId}`}
+            title={v.title}
+            allowfullscreen
+          ></iframe>
+        </div>
+      ))}
+    </section>
+  )}
+
   {related.length > 0 && (
     <section class="related">
       <h2>関連する用語</h2>
@@ -120,6 +136,22 @@ const related = terms
     font-size: 15px;
     line-height: 1.9;
     margin: 16px 0 40px;
+  }
+  .videos {
+    margin: 0 0 40px;
+  }
+  .videos h2 {
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0 0 8px;
+    font-weight: 600;
+    border: none;
+    padding: 0;
+  }
+  .video-title {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 6px;
   }
   .related {
     margin-top: 48px;

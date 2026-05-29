@@ -232,7 +232,15 @@ John "Vermin" Sherman が1991年に提案。数字が大きいほど難しい。
 
 ---
 
-## 10. 未解決の問い
+## 10. 動画
+
+<div class="video-embed">
+<iframe src="https://www.youtube.com/embed/SQbS-ePgdZ4" title="YouTube video" allowfullscreen></iframe>
+</div>
+
+---
+
+## 11. 未解決の問い
 
 - 日本の段級と世界グレードの乖離は縮まっているか
 - AIセッティング／ジムの統一化はグレード体系を変えるか
