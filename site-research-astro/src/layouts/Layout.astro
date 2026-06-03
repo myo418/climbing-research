@@ -150,7 +150,7 @@ const { title } = Astro.props;
     background: #22221f;
     color: #e5e5e0;
     padding: 16px 20px;
-    border-radius: 6px;
+    border-radius: 12px;
     overflow-x: auto;
     font-family: var(--font-mono);
     font-size: 13px;
@@ -285,14 +285,14 @@ const { title } = Astro.props;
     padding: 14px 18px 12px;
     background: var(--sidebar-bg);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
   }
   .prose .phrase-section h3:has(+ p) {
-    border-radius: 6px 6px 0 0;
+    border-radius: 12px 12px 0 0;
     border-bottom: none;
   }
   .prose .phrase-section h3 + p {
@@ -301,27 +301,29 @@ const { title } = Astro.props;
     background: var(--sidebar-bg);
     border: 1px solid var(--border);
     border-top: none;
-    border-radius: 0 0 6px 6px;
+    border-radius: 0 0 12px 12px;
     color: var(--muted);
     font-size: 13px;
     line-height: 1.6;
   }
   .prose .phrase-section .easy,
   .prose .phrase-section .normal,
-  .prose .phrase-section .hard {
+  .prose .phrase-section .hard,
+  .prose .phrase-section .solo {
     display: inline-block;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    padding: 2px 8px;
-    border-radius: 3px;
+    padding: 3px 10px;
+    border-radius: 20px;
     white-space: nowrap;
     flex-shrink: 0;
   }
   .prose .phrase-section .easy   { background: #dff0df; color: #2a6b2a; border: 1px solid #b5d9b5; }
   .prose .phrase-section .normal { background: #f5ead4; color: #7a5200; border: 1px solid #e0cc99; }
   .prose .phrase-section .hard   { background: #f5dede; color: #8b2020; border: 1px solid #e0b0b0; }
+  .prose .phrase-section .solo   { background: #eae8f0; color: #4a3d6b; border: 1px solid #c5bed9; }
 
   /* 一問一答レイアウト */
   .prose .qa-section h1 {
