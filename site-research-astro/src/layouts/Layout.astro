@@ -325,6 +325,72 @@ const { title } = Astro.props;
   .prose .phrase-section .hard   { background: #f5dede; color: #8b2020; border: 1px solid #e0b0b0; }
   .prose .phrase-section .solo   { background: #eae8f0; color: #4a3d6b; border: 1px solid #c5bed9; }
 
+  .prose .phrase-section .freq-high,
+  .prose .phrase-section .freq-mid,
+  .prose .phrase-section .freq-low {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .prose .phrase-section .freq-high { background: #deeaf8; color: #1a4f8a; border: 1px solid #9ec3e8; }
+  .prose .phrase-section .freq-mid  { background: #f0f0f0; color: #666;   border: 1px solid #ccc; }
+  .prose .phrase-section .freq-low  { background: #fafafa; color: #aaa;   border: 1px solid #ddd; }
+
+  /* 頻出度タグを関係値タグに近づける */
+  .prose .phrase-section h3 [class^="freq"] {
+    margin-left: -8px;
+  }
+
+  /* フィルター UI */
+  .phrase-filter {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .phrase-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .phrase-filter-label {
+    font-size: 11px;
+    color: #888;
+    width: 44px;
+    flex-shrink: 0;
+  }
+  .filter-btn {
+    cursor: pointer;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    background: none;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+  }
+  .filter-btn:hover { opacity: 0.7; }
+  .filter-btn[data-active="true"] { opacity: 1; outline: 2px solid currentColor; outline-offset: 1px; }
+  .filter-btn.easy   { background: #dff0df; color: #2a6b2a; border: 1px solid #b5d9b5; }
+  .filter-btn.normal { background: #f5ead4; color: #7a5200; border: 1px solid #e0cc99; }
+  .filter-btn.hard   { background: #f5dede; color: #8b2020; border: 1px solid #e0b0b0; }
+  .filter-btn.solo   { background: #eae8f0; color: #4a3d6b; border: 1px solid #c5bed9; }
+  .filter-btn.freq-high { background: #deeaf8; color: #1a4f8a; border: 1px solid #9ec3e8; }
+  .filter-btn.freq-mid  { background: #f0f0f0; color: #666;   border: 1px solid #ccc; }
+  .filter-btn.freq-low  { background: #fafafa; color: #aaa;   border: 1px solid #ddd; }
+
   /* 一問一答レイアウト */
   .prose .qa-section h1 {
     font-size: 18px;
@@ -443,5 +509,46 @@ const { title } = Astro.props;
     height: auto;
     display: block;
     border-radius: 2px;
+  }
+
+  @media print {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+
+    .sidebar,
+    .phrase-filter,
+    #img-dialog { display: none !important; }
+
+    .app {
+      display: block;
+    }
+
+    .main {
+      padding: 0;
+    }
+
+    .prose {
+      max-width: 100%;
+    }
+
+    .prose h2 {
+      margin-top: 24px;
+      page-break-after: avoid;
+    }
+
+    .prose .phrase-section h3,
+    .prose .phrase-section h3 + p {
+      page-break-inside: avoid;
+    }
+
+    .prose .phrase-section h3 {
+      margin-top: 8px;
+      page-break-after: avoid;
+    }
+
+    .prose a {
+      color: inherit;
+      text-decoration: none;
+    }
   }
 </style>
