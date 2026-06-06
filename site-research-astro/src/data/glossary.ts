@@ -1975,4 +1975,13 @@ export const terms: GlossaryTerm[] = [
     tags: ['怪我'],
     description: 'クライマーやビレイヤーの肌にロープが擦れて生じる摩擦熱による傷。グランドフォール時やロープの誤った取り回しで発生する。',
   },
+  {
+    slug: 'alien',
+    prominence: 'minor',
+    term: '宇宙人',
+    english: 'Alien',
+    reading: 'うちゅうじん alien',
+    tags: ['スタイル'],
+    description: '常人離れした強さを持つクライマーへの称賛として使われるスラング。身体能力・感覚・思考のどこかが「人間じゃない」と感じさせるほど突出しているとき、敬意を込めて「宇宙人みたい」と表現する。',
+  },
 ];

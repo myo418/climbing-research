@@ -82,6 +82,7 @@ research/
 - **リサーチサイト（内部）**: ゼミ関係者向け、未精査含む全素材を公開 → [site-requirements.md](site-requirements.md) Part 1
 - **公開サイト（外部）**: インタビュー対象者・一般向け、精査済みのみ → [site-requirements.md](site-requirements.md) Part 2
 - **デザインシステム**: [DESIGN.md](DESIGN.md) — 両サイトで共有
+- **Figmaデザインファイル**: https://www.figma.com/design/kTkDlnMYiKBIwC8hrCBIq6/%E5%8D%92%E6%A5%AD%E5%88%B6%E4%BD%9C?node-id=0-1&p=f&t=vOevdfeTKTyLkvMz-0 — デザインデータはここに集約
 - **ゼミ発表形式**: 未定
 
 ---
