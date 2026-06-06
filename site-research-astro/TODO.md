@@ -59,7 +59,7 @@
 
 - [ ] `contents/references/movies/index.md` — 映画・ドキュメンタリーを書く
 - [ ] `contents/references/books/index.md` — 書籍を書く
-- [ ] `contents/references/youtube/index.md` — YouTube動画を書く
+- [x] `contents/references/youtube/index.md` — YouTube動画を書く
 - [ ] `contents/references/sns/index.md` — SNSアカウントを書く
 - [ ] `contents/references/materials/index.md` — その他素材を書く
 
