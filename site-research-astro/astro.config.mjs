@@ -31,7 +31,7 @@ export default defineConfig({
     remarkPlugins,
   },
   server: {
-    port: 4321,
+    port: 4400,
     host: true,
   },
 });
