@@ -1,0 +1,93 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { voices, MOMENTS, MOMENT_LABELS, type Moment } from '../../../data/climbing-voices';
+---
+
+<Layout title="クライミング中に出てしまう言葉">
+  <h1>クライミング中に出てしまう言葉</h1>
+  <p class="meta">{voices.length} フレーズ</p>
+
+  <div class="voice-filter">
+    {MOMENTS.map((m) => (
+      <button class="filter-btn" data-value={m}>{MOMENT_LABELS[m]}</button>
+    ))}
+  </div>
+
+  <div class="voice-list">
+    {voices.map((v) => (
+      <div class="voice-card" data-moment={v.moment}>
+        <p class="voice-phrase">{v.phrase}</p>
+        <span class={`voice-tag moment-${v.moment}`}>{v.moment}</span>
+        <p class="voice-desc">{v.description}</p>
+      </div>
+    ))}
+  </div>
+</Layout>
+
+<script>
+(function () {
+  let active: string | null = null;
+
+  document.querySelectorAll<HTMLButtonElement>('.filter-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const value = btn.dataset.value!;
+      active = active === value ? null : value;
+      document.querySelectorAll<HTMLButtonElement>('.filter-btn').forEach((b) => {
+        b.dataset.active = String(b.dataset.value === active);
+      });
+      document.querySelectorAll<HTMLElement>('.voice-card').forEach((card) => {
+        card.style.display = !active || card.dataset.moment === active ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>
+
+<style>
+  .meta {
+    color: var(--muted);
+    font-size: 13px;
+    margin: -12px 0 24px;
+  }
+
+  .voice-filter {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .voice-list {
+    display: grid;
+    gap: 16px;
+  }
+
+  .voice-card {
+    border: 1px solid var(--color-line, #ddd8d0);
+    border-radius: 2px;
+    padding: 16px 20px;
+  }
+
+  .voice-phrase {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+
+  .voice-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-bottom: 10px;
+    background: var(--color-line, #ddd8d0);
+    color: var(--color-ink-muted, #666);
+  }
+
+  .voice-desc {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--color-ink, #1a1a1a);
+  }
+</style>

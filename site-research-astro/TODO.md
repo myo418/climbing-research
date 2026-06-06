@@ -27,12 +27,6 @@
 - [ ] `contents/climbers/me/13-mitake-2/index.md` — 御岳（後編）友人が落下・全治6か月
 - [ ] `contents/climbers/me/14-realize/index.md` — 本気で打ち込めないと自覚
 
----
-
-## 🤖 AIに任せられるタスク
-
-外部リソース・一般知識で書けるもの。「やって」と言えば処理できる。
-
 ### 人物プロフィール
 
 - [ ] `contents/climbers/people/a/index.md` — プロフィールを書く
@@ -40,6 +34,12 @@
 - [ ] `contents/climbers/people/c/index.md` — プロフィールを書く
 - [ ] `contents/climbers/people/d/index.md` — プロフィールを書く
 - [ ] `contents/climbers/people/ninja-kaeshi/index.md` — プロフィールを書く
+
+---
+
+## 🤖 AIに任せられるタスク
+
+外部リソース・一般知識で書けるもの。「やって」と言えば処理できる。
 
 ### よくある会話
 

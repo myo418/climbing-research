@@ -51,18 +51,28 @@ import {
           </div>
         ) : (
           <div class="channel-video-placeholder">
-            <span class="channel-initial">{ch.name[0]}</span>
+            {ch.iconUrl
+              ? <img class="channel-icon-hero" src={ch.iconUrl} alt={ch.name} loading="lazy" />
+              : <span class="channel-initial">{ch.name[0]}</span>
+            }
           </div>
         )}
         <div class="channel-body">
-          <div class="channel-tags">
-            <span class={`tag lang-${ch.language}`}>{LANGUAGE_LABELS[ch.language]}</span>
-            <span class={`tag type-${ch.type}`}>{TYPE_LABELS[ch.type]}</span>
-            {ch.subscribers && <span class="tag subscribers">{ch.subscribers}</span>}
+          <div class="channel-header">
+            {ch.iconUrl && ch.featuredVideoId && (
+              <img class="channel-icon" src={ch.iconUrl} alt={ch.name} loading="lazy" />
+            )}
+            <div class="channel-meta">
+              <div class="channel-tags">
+                <span class={`tag lang-${ch.language}`}>{LANGUAGE_LABELS[ch.language]}</span>
+                <span class={`tag type-${ch.type}`}>{TYPE_LABELS[ch.type]}</span>
+                {ch.subscribers && <span class="tag subscribers">{ch.subscribers}</span>}
+              </div>
+              <h3 class="channel-name">
+                <a href={ch.url} target="_blank" rel="noopener noreferrer">{ch.name}</a>
+              </h3>
+            </div>
           </div>
-          <h3 class="channel-name">
-            <a href={ch.url} target="_blank" rel="noopener noreferrer">{ch.name}</a>
-          </h3>
           <p class="channel-desc">{ch.description}</p>
         </div>
       </div>
@@ -239,11 +249,36 @@ document.querySelectorAll<HTMLElement>('.channel-video').forEach((wrapper) => {
   .channel-body {
     padding: 12px 14px 14px;
   }
+  .channel-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .channel-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    margin: 0;
+  }
+  .channel-icon-hero {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0;
+  }
+  .channel-meta {
+    flex: 1;
+    min-width: 0;
+  }
   .channel-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .tag {
     display: inline-block;

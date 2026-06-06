@@ -11,6 +11,8 @@ export interface YoutubeChannel {
   subscribers?: string;
   featuredVideoId?: string;
   featuredVideoTitle?: string;
+  iconUrl?: string;
+  bannerUrl?: string;
 }
 
 export const TYPE_LABELS: Record<ChannelType, string> = {
@@ -38,6 +40,8 @@ export const channels: YoutubeChannel[] = [
     description: 'フォトグラファー・鈴木岳美によるクライミングと登山を軸にした映像チャンネル。ビッグウォール登攀、アイスクライミング、技術解説まで本格的な内容を発信。ReelRock などプロ映像作品の撮影実績もあり。',
     featuredVideoId: 'jgZa027Q8cg',
     featuredVideoTitle: 'いざ、エルキャピタンの大岩壁へ再び（前編）',
+    iconUrl: 'https://yt3.googleusercontent.com/ZmfRnDREE_XrqD0pgE7c7IXnmztzp8-CqEoyKKPLotKGc863gPvRf45SG2_MibAroMemrGH9mA=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/C2TmIR29xQrBf3cO4ct0lO8fWea09JrN9GFLmNIlyxI_PF6Aa9Y3RuyEEcqca4FLhJg5Eu-m1b0=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'tamy',
@@ -49,6 +53,8 @@ export const channels: YoutubeChannel[] = [
     description: '楢崎智亜・楢崎明智兄弟、野口啓代、池田雄大の4人が共同運営。クライミングレクチャー、チャレンジ動画、日常コンテンツを配信。',
     featuredVideoId: '4jWlwQH52Ds',
     featuredVideoTitle: 'Daily Training | Sibling session!!!',
+    iconUrl: 'https://yt3.googleusercontent.com/ZwYh0MUJmB0rN4ys7RIOBP4s1B6qhR8w_01GUNAX6ix1Sj4We5-4pvQeVE9vrEqJ88NNF7IogA=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/HA-q4Ho_Uwdfbc6yImuIz-cZgeWd6bXR_2R9hXpRSdxG3HwoZuhaJL5BWSAtvpbGt1rAxN_V9Q=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'kai-harada',
@@ -60,6 +66,8 @@ export const channels: YoutubeChannel[] = [
     description: '2018年世界選手権ボルダリング金メダリスト・原田海の個人チャンネル。外岩でのルートトライ、トレーニング動画、プロクライマーの日常を配信。',
     featuredVideoId: 'DBVOxo_tSqI',
     featuredVideoTitle: '関西の指力モンスター原田海【ボルダリング】',
+    iconUrl: 'https://yt3.googleusercontent.com/OmzlBsnAhbDYuB8e0NhSPo3HCRxqsJc5oMeiDF5oT8NJTwIME5c-6nRsGH-21ShEE27EzXil_Q=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/hA77LRGO56mvMyh59Bcuu-Qo0XTZTWWrSOWmshoBLLBp238Y4DKTuoD--lL5_zk1e82sSuJc=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'miho-nonaka',
@@ -70,6 +78,8 @@ export const channels: YoutubeChannel[] = [
     subscribers: '約3.6万人',
     description: '東京五輪日本代表・野中生萌の公式チャンネル。競技の舞台裏、トレーニング、日常をドキュメント形式で発信。',
     featuredVideoId: 'MK8P6vsIOio',
+    iconUrl: 'https://yt3.googleusercontent.com/M3nJXtjK5K_CTZqLFUqhgZVN6JV3o0ha6kbTwwdGlTvgoOmmwY-A9yusfGFfs036lO9CzhtsvA=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/cKEVh6JGR0yLO9DCZEAhETA21C5ckAgqsyNZpdADe2M6bsTjanrOSokycissqWm7BBMCvXjZ=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'saya-climbing',
@@ -81,6 +91,8 @@ export const channels: YoutubeChannel[] = [
     description: 'クライミング歴37年・ジム経営11年のインストラクター・田辺小弥香が運営。初心者・非力な女性向けに身体の使い方・テクニックをわかりやすく解説。',
     featuredVideoId: '86IkwXnxqlo',
     featuredVideoTitle: '遠くまで届く基本を教えちゃいます！',
+    iconUrl: 'https://yt3.googleusercontent.com/aQqUS6bTat5zdeEnuN9JUX4DOW5IX7Urua3J8V2uF7dUNQJb6rNAdyhI7w2KukIUNJ8muILIzKg=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/YAI8pe842fPJWp1WteGellRdzMfd_U5FQ4RHXNhoAvlJEBDUDlMhu6PbC1FlcKourC5JnIR9ng=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'dai-koyamada',
@@ -92,6 +104,8 @@ export const channels: YoutubeChannel[] = [
     description: '日本を代表するプロボルダラー・小山田大の個人チャンネル。世界最高峰の外岩課題の初登映像やトーク企画「Dai\'s Talk Diaries」を配信。',
     featuredVideoId: 'Al6qruU0IyE',
     featuredVideoTitle: "Dai's Talk Diaries",
+    iconUrl: 'https://yt3.googleusercontent.com/zE_SdNzn5T87MQR3M0Zx3jpERt_aHEO1_5cCXVg24zW1STWVmxG0YmH6M_5JtnBL7zlLnuq4ww=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/MFoopeHF6KFNwsPIvRr1gHrHgbnhVQfW9GUC2LRO7hEKJmujrCV7P2Kh4INyM4_bxo7p7YBAXw=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'ikedai-olioli',
@@ -102,6 +116,8 @@ export const channels: YoutubeChannel[] = [
     subscribers: '約1.4万人',
     description: 'スピードクライミング元日本代表・池田雄大とクライミングジム OLIOLI のチャンネル。スピードクライミングの練習・記録映像やジムの日常を配信。',
     featuredVideoId: 'RW_VKtLcgtU',
+    iconUrl: 'https://yt3.googleusercontent.com/CcHQGQ8OH2sx08kRyZeCTj3xzooizclx5SpQGKefuKoR-HTNBwUGaHCM4OFZUeIH1N2VXCI4=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/cay3lzyEOLt6Kse0_rDK9DHIma3jT7anbTG2LjuoE08CBwYFbdV0NDnGeKpSCkxFZHZDC1ePvKg=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'hghomoru',
@@ -112,6 +128,31 @@ export const channels: YoutubeChannel[] = [
     description: '映像作家・萩原悟による個人チャンネル。国内外の傑作フリークライミングルートを4K映像で記録・公開。松島暁人、平山ユージなど第一線クライマーの映像多数。',
     featuredVideoId: 'PabvC0ZUBOU',
     featuredVideoTitle: '伝説のハードルート！踊る蒟蒻',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_lbdiLh9oUh-w2mrjjNZ-Xumx3uda-YbueaFAoQ2gTZ2Q=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/LuZJI28F4Bxo4miHX7VjGDHX427F2oqgjB1J1SrMe-_zuWDzNmn725lxxDnEhdqiUo2XlxSPaw=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
+  },
+  {
+    slug: 'muhyoroojii',
+    name: 'orya ina（オリャー）',
+    url: 'https://www.youtube.com/@muhyoroojii',
+    language: 'ja',
+    type: 'individual',
+    subscribers: '約3,000人',
+    description: '瑞牆山を主舞台とした外岩ボルダリング記録チャンネル。「Decided（五段）」「ミネルヴァ（五段）」など国内トップクラスの難度課題の完登映像を公開している。',
+    featuredVideoId: 'tgGgV9Hqlag',
+    featuredVideoTitle: '瑞牆　Decided（五段）V14',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_mbeZihYAwmJgO0NldphTTC1p0eyUHlmJENlJrbiGxzQcA=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/baPbxoUgd2a8oUpBDNEutN35T5th-NJDfvpwQm387BTMZdytbOirg1_VDCs8D8cNlKvc--JBkpg=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
+  },
+  {
+    slug: 'climbing2025',
+    name: '40s climbing',
+    url: 'https://www.youtube.com/@climbing2025',
+    language: 'ja',
+    type: 'individual',
+    description: '40代からボルダリングを始めた視点で発信する初心者向けチャンネル。同年代のクライマーに向けた身体の使い方や上達のヒントを中心に配信。',
+    iconUrl: 'https://yt3.googleusercontent.com/00XcJlkjrXimC6t62Jvwc2XMYnCW6Nb572qYjXpvA5PtKDjCm43dLNhuWKCoRA4onPRfUphmTVk=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/S_Dx5OzFb4z9tiGLn2kgdLZNE8c3-TciRjC7-Hc9WM4w249xaxvnwXIrVV2BdFdN4unH8dEtkA=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   // ── 日本語 / ジム ──────────────────────────────────────
   {
@@ -124,6 +165,8 @@ export const channels: YoutubeChannel[] = [
     description: '川崎市（中野島）のクライミングジム PUMP2 の公式チャンネル。課題紹介・技術講座・ホールド仕入れ現場の潜入レポートなどを発信。',
     featuredVideoId: 'FNdAY7SDKQc',
     featuredVideoTitle: '【PUMP2名物】TSUNAMI壁セット用のホールド買付け現場に潜入！',
+    iconUrl: 'https://yt3.googleusercontent.com/5ywQbXerWFmuqmkTfBUdAzFdT3fJeXfl3mBdme0qXr5dakQkUfaQ0RXTes2nU4L_8d24mIOdDMY=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/vTpUPolI7o0L7qzNufYdOWy6F7vfXvI9EAzywMOLHaL3_OCD9cz_urCVT4AvBWISUlkE62qP=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'd-bouldering',
@@ -135,6 +178,8 @@ export const channels: YoutubeChannel[] = [
     description: '全国10店舗以上を展開するボルダリングジムチェーン D.Bouldering の公式チャンネル。ジム紹介、セッティングの裏側、各店舗のルート紹介など。',
     featuredVideoId: 'foVDtwkHB3k',
     featuredVideoTitle: 'セットの裏側公開！D.Bouldering 八王子店のセットのこだわり',
+    iconUrl: 'https://yt3.googleusercontent.com/UQOyJ5w53k5_uM1KQe20Zffk27Sp6q6aqRyQEkkNatD2HbCEObAP-UXS8oaJzx3-F251hQ3nCCw=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/iFwrVYDQ7xAln-upPiSNJua36X8iwxoElTI_skZXRiD5A0aLqrDOnonz_QC2ubo4pfQaS30ohg=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'climbing-gym-oz',
@@ -144,6 +189,8 @@ export const channels: YoutubeChannel[] = [
     type: 'gym',
     description: '群馬県太田市にあるクライミングジム「オズ」の公式チャンネル。巨大140度壁が特徴で、ウィークリー壁やコンペ映像を定期的に公開。',
     featuredVideoId: 'ERrsa4F9d_A',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_l_7kVHV9GyRbQpkbY-BWIMEukZdkzOvQtIZZzxsqN0VjI=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/gnlNUAaH4ts1LzU6-UZk73MNKBKWhiBO3afJnSnnsK-D_SqtMFrdGXm41AIylAAjkbYdi2nX=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'bouldering-gym-share',
@@ -154,6 +201,8 @@ export const channels: YoutubeChannel[] = [
     description: '横浜市鶴見区にある神奈川最大級のボルダリングジム「Bouldering Gym Share」の公式チャンネル。ルート紹介、THE NORTH FACE CUP などコンペ映像を配信。',
     featuredVideoId: 'AtYfD4NBIaU',
     featuredVideoTitle: 'THE NORTH FACE CUP 2024 ROUND11',
+    iconUrl: 'https://yt3.googleusercontent.com/27zydhhe4qkzJf8C5BflBaMVufi611H8qsI65kwEGVfo8z3C8MLArJfsEpm0yUUk2Yo_ueDRuw=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/pwImfHNPTLG6HycZa4NDC2wiDw_rEWS1Bit_yfD_WDtWJj6vMAJD0XPVPEEXrJCTjDt2NScPtEQ=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   // ── 日本語 / ブランド ──────────────────────────────────
   {
@@ -166,6 +215,8 @@ export const channels: YoutubeChannel[] = [
     description: "アークテリクス日本法人の公式チャンネル。クライミング・アルパインなどアウトドア活動のドキュメンタリー映像を制作・配信。「Arc'teryx Presents」シリーズが中心。",
     featuredVideoId: 'mQhPPhGie6E',
     featuredVideoTitle: "Arc'teryx Presents: Climbing Through",
+    iconUrl: 'https://yt3.googleusercontent.com/YcrwW9otlrv2dlxB-YaW0apRn7Cp8KdlVph7i9-x8sSLHL_qp4P4k3VNnPfg_U5G18uopWHsSw=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/wMFbH0TUCQoMA_UI91edPG5VIMpWNux9d-al13cB91hRarC0cgaCtXnleA-Iy7cMYFglOEjDA3c=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'patagonia-jp',
@@ -176,6 +227,8 @@ export const channels: YoutubeChannel[] = [
     description: 'アウトドアブランド「パタゴニア」日本支社の公式チャンネル。クライミング・トレイルランニング・サーフィンなどのアウトドア映像と、環境・サステナビリティ関連コンテンツを発信。',
     featuredVideoId: 'oPRQioUg-mU',
     featuredVideoTitle: '春のアルパインクライミング：パタゴニア',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_n_kZ1bFYoNURnyUdkwC33SEnldMVnatG7qGbSBem0WOkM=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/5io4IPdgFGBv_6udy81V6sbfhbrz0luJVWd1pqXf9BhR2xTqjMeTNG7PqdpBFzVvFvABdScDP28=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   // ── 日本語 / 映像・メディア ────────────────────────────
   {
@@ -187,6 +240,8 @@ export const channels: YoutubeChannel[] = [
     description: '「日本クライマー名鑑」シリーズでトップクライマーのトレーニング法・道具選び・休日の過ごし方などを掘り下げる映像メディア。',
     featuredVideoId: 'p0iyWjkUzLo',
     featuredVideoTitle: '小川山 チムニー 6級 外岩ボルダリング',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_mu8nfzNBlQUiXAcDNNV72BuMcBvTIlwbU7XI1fiFXbtw=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/fAWT6tB4HH8G0a4aSLb5RVwHEceRqwI9rDboFOJ3-Q3JVPTolnk1YNrhRWOWAD8pXLvj9ruyE_E=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   // ── 日本語 / 競技団体 ──────────────────────────────────
   {
@@ -197,8 +252,23 @@ export const channels: YoutubeChannel[] = [
     type: 'organization',
     subscribers: '約3万人',
     description: '日本山岳・スポーツクライミング協会（JMSCA）の公式チャンネル。国内コンペ（ジャパンカップ、リード・ボルダー選手権等）のライブ中継とアーカイブを配信。',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_kd1PhhNY5uoNd7fwMvc-Pkf0WronUVIWK4lHdD_TC2dg=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/nOtTO9wFIYZ5Jlt3IomLJRSDaMT-hhBhwTHY4kwhdqBRwDWu57O0k3e3tFeoWb0xfv6syBmpW7Q=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   // ── 英語 / 個人 ────────────────────────────────────────
+  {
+    slug: 'alexander-megos',
+    name: 'Alexander Megos',
+    url: 'https://www.youtube.com/@alexandermegosAM',
+    language: 'en',
+    type: 'individual',
+    subscribers: '約11.5万人',
+    description: 'ドイツ出身のプロスポーツクライマー。9c+「Bibliographie」の初登をはじめ世界最難クラスのルートを多数登攀。外岩プロジェクトの記録やトレーニング映像を中心に発信。',
+    featuredVideoId: 'ZRTNHDd0gL8',
+    featuredVideoTitle: "Silence | World's Hardest Route 9c",
+    iconUrl: 'https://yt3.googleusercontent.com/ePu9N7mU99uN5nVaYHF7ctJKq2_hceWciTpwoBTBtix69B2HxLwLHehFo1Yp4tSzb_3Yc5KGlg=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/zwFzkVkKdiqHAh8x70WQocNw2-Rmfm7ifBw1C365EV1ObdynJs3lb0rUDUMVbJK--XU_P3pyNA=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
+  },
   {
     slug: 'adam-ondra',
     name: 'Adam Ondra',
@@ -209,6 +279,8 @@ export const channels: YoutubeChannel[] = [
     description: '世界最難ルート（Silence 9c ほか）を次々と初登したチェコ人クライマーの個人チャンネル。プロジェクトの舞台裏、トレーニング解説、栄養管理まで幅広く配信。',
     featuredVideoId: 'ZRTNHDd0gL8',
     featuredVideoTitle: "Silence | World's Hardest Route 9c",
+    iconUrl: 'https://yt3.googleusercontent.com/PgjNmSfwYTuhZKL_uKEluJEakWV2zgrQQN8FDai9wOj1WDrpGDXBfuIi2uun796LCIVHEe_iLQ=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/ZECW0Dkn7O7drTgsxvq0lqHVkraZaklmRl_A8CTe1HtPBRVmTOpznnY_v6pInQwMJvpWqkkdMTw=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'magnus-midtbo',
@@ -220,6 +292,8 @@ export const channels: YoutubeChannel[] = [
     description: '元ノルウェー代表プロクライマー。クライミング動画のほか、UFC選手やNBA選手とのコラボチャレンジで幅広い視聴者を獲得。クライマー初の200万人突破（2023年）。',
     featuredVideoId: 'CtEu_HyFqsQ',
     featuredVideoTitle: "World's Strongest Man Tries ROCK CLIMBING!",
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_nFajjTpM6nDKH9jKp6k8Ru_dxNZPBKYbZ1mOgwtzYZOA=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/ta-ysIgYfCSU4Sx-tQ9I-6KLkqDifLdzof3YG_lc2vtDVu4URKat_s2Ms3TJJnbJLHIy7QOB3w=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'emil-abrahamsson',
@@ -230,7 +304,9 @@ export const channels: YoutubeChannel[] = [
     subscribers: '約34万人',
     description: 'スウェーデン人ボルダラー（V15レッドポイント、V12フラッシュ）。ユーモアあふれるトレーニングVlogや外岩冒険動画が特徴。',
     featuredVideoId: 'Rx0MrDCpkYo',
-    featuredVideoTitle: 'Emil Abrahamsson Breaks Down the HARDEST Boulders He\'s Tried',
+    featuredVideoTitle: "Emil Abrahamsson Breaks Down the HARDEST Boulders He's Tried",
+    iconUrl: 'https://yt3.googleusercontent.com/Mtfiu4kb1dzkF9_vT-8zBmJ0-dfw5GLPzi8RXULAlYrTSPJDZo0tU6UKc6Gcn8KvbcMTKK3d0A=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/EPnfLWAj0FrTU2PRIgRuXNji36xodmNo-P3UZ2VfeviuzStSYM0mB6hdemIFmBgkFgj9VTukkw=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'alex-honnold',
@@ -242,6 +318,8 @@ export const channels: YoutubeChannel[] = [
     description: '映画「Free Solo」でアカデミー賞を受賞したフリーソロクライマー。El Capitan単独無確保登攀で知られる。登攀映像やナショナルジオグラフィック連動コンテンツを配信。',
     featuredVideoId: 'l-kF4iSg0XM',
     featuredVideoTitle: 'Alex Honnold Before the Climb | Free Solo',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_m5IgEXSlNGp0AILuE8aeAZI3GPvRdO9FZ06WMvW8OftHg=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/tbIhafmnGaaa7AK0mhlLadcKOVDh23VI73Y2BKTgtxsQb6Vu3hF5dmaGOSBOtnkpqsY0hJ4jZw=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'chris-sharma',
@@ -262,6 +340,8 @@ export const channels: YoutubeChannel[] = [
     description: 'クライミングとカリステニクスを組み合わせた解説チャンネル。科学的・分析的アプローチで上達法を紹介。',
     featuredVideoId: 'XXrDQ8PCAmI',
     featuredVideoTitle: 'How To Build Finger Strength (SCIENCE EXPLAINED)',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_mK7i9pbdwkJaMATRSEysEW_OVHFlKUCfnl9YNCUOZpww=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/WYiBjXkNt-LJW-EvWFnW9zvdge5kcdyrivVOWC1epbUJvRxmoPAghV8lSpKYQ-fHUloOYn1_1w=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'wide-boyz',
@@ -273,6 +353,8 @@ export const channels: YoutubeChannel[] = [
     description: 'Tom Randall と Pete Whittaker によるクラッククライミング特化チャンネル。世界最難オフウィズスクラック「Century Crack（5.14b）」初登者コンビ。',
     featuredVideoId: 'BWg1VfHmq3E',
     featuredVideoTitle: 'The Wide Boyz Take Over American Offwidth Climbing',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_mmP1IQ9kF2jEqHdUkSbnUon48gUJFU2vz_n0LBUO5E8IE=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/ECHwNR7CsPQLkmd9Uu7Z6D_BtLxHvf2Wym3J4o5sXTwL1WCr7NX2kpKwjsyfd1wVVPxOb842YQ=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'eric-karlsson',
@@ -282,6 +364,8 @@ export const channels: YoutubeChannel[] = [
     type: 'individual',
     subscribers: '約20万人',
     description: 'スウェーデン拠点のインドアボルダリング特化チャンネル。Adam Ondra、Magnus Midtbø など世界トップクライマーとのセッション動画が多数。',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_kEF50qBN2Q0bT7FTdShLdDU_XhJtqKu6gb5Py6KKCZ9L8=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/RYpDNXttMAe1iJodc4ShdCZn2L6_FoLLThJJVBhZOeR4lTw9zD7wmwBmQGfEbjVvvsR7asVBwLY=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'lattice-training',
@@ -293,6 +377,8 @@ export const channels: YoutubeChannel[] = [
     description: 'イギリスのクライミングコーチング企業。科学的根拠に基づくトレーニング理論、フィンガーボード・コアトレーニング、怪我の予防とリハビリ解説が充実。',
     featuredVideoId: 'vWl4ZHXDytI',
     featuredVideoTitle: 'Detailed Training Plan for Rock Climbing',
+    iconUrl: 'https://yt3.googleusercontent.com/zxJBk__jv6t6_r4pT5-nlG64OTKzfGKSZ_lO9UJiH1VMesLxwx3_cS-5nIe51l_nwfcJ8k3hXQ=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/SEtoXDRUqL9JALf-KPRBmesl09-jxMXd_fWXQc2w9huUKcl6tuUkIvcpYzHKLx3ZEFjd6B29pA=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   // ── 英語 / ブランド ────────────────────────────────────
   {
@@ -303,6 +389,8 @@ export const channels: YoutubeChannel[] = [
     type: 'brand',
     subscribers: '約54.7万人',
     description: '契約クライマー（Alex Honnold、Tommy Caldwell ら）のドキュメント映像、極地・岩壁での挑戦記録を高品質で配信。',
+    iconUrl: 'https://yt3.googleusercontent.com/TChp5eBDgpAx9igREfHIEcwlD5NxUuOf_BU9_dML3_xTTDCCGpg6qn0fcwoypL9vgkKe62mw=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/2FQ2W_tTRm0ABMjv1GqBGhXpsDtHlPtOcv2p47LMLQ4CxJhQghlyI_NrdZ8iP48MEAyjjm4W=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   // ── 英語 / 映像・メディア ──────────────────────────────
   {
@@ -315,6 +403,8 @@ export const channels: YoutubeChannel[] = [
     description: 'Sender Films の公式チャンネル。「Valley Uprising」「The Dawn Wall」「The Alpinist」など受賞歴のある長編ドキュメンタリーを制作・配信。',
     featuredVideoId: 'hQXWnoipdFE',
     featuredVideoTitle: 'Valley Uprising Official Trailer',
+    iconUrl: 'https://yt3.googleusercontent.com/nqWluQVwUGm2El6j4Atu7MGOxUTif4V3xJ6J07cuLo8CqSln_Q6V_uyqUfow_yV7wQBOHwV5xw=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/HaN8QQfhIQ0nIrjgWGPsdBiBs_Nr_mzYeMSgIKly_vlzyW3aLamQGg7PvRXzkU2NjfrsRRTb=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'mellow',
@@ -324,6 +414,8 @@ export const channels: YoutubeChannel[] = [
     type: 'media',
     subscribers: '約12.3万人',
     description: '世界トップクライマーたちが結成した映像チーム。シネマティックな映像美でクライミングの美しさと興奮を伝えることに特化。',
+    iconUrl: 'https://yt3.googleusercontent.com/9GH5ckS24pnTRkxzcKUv8Z13B_fRAt0a-xwak92egJRaXYui1s-QOpg6LmwlpwOg9T_pecdzEg=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/IJEhtahCwKx1eloXTbi5U_vKKQ6XkIX_KoAwcvq0ajsVRS_g9HNusdE24DktKbY4wNg6_6NWZ3M=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'hard-is-easy',
@@ -333,6 +425,8 @@ export const channels: YoutubeChannel[] = [
     type: 'media',
     subscribers: '約37万人',
     description: 'トップクライマーのトレーニング哲学や精神面に迫るコンテンツを制作。高品質な映像とインタビューで知られる。',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_mjs923yC8AcVTJ1JMuHl-nHlmGwyIhUmH1tqNZl356br4=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/LiCjtMel9WqU9-qCYXYOFyUwqy8EFW3RDT6L0MizzJRCNDaYdoO3KS5gMZYQhtgg6jBQ108twg=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   {
     slug: 'epictv',
@@ -342,6 +436,8 @@ export const channels: YoutubeChannel[] = [
     type: 'media',
     subscribers: '約29.1万人',
     description: 'クライミングニュース・コンペ・インタビュー・チュートリアルをほぼ毎日配信する総合情報チャンネル。スポーツ、トラッド、アイス、ボルダーまで幅広くカバー。',
+    iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_nJc_7YYluNa1bC09bEYod-l8qUF6ML9tOvgm5xbSPnwQ=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/VDcmB5A2a-6A4qu7mZhqiWwdRinhf8zASNk6GqTIsOJWd9u104eBi2FoRSJGfaGAxNRMEzxs3Q=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
   // ── 英語 / 競技団体 ────────────────────────────────────
   {
@@ -352,5 +448,7 @@ export const channels: YoutubeChannel[] = [
     type: 'organization',
     subscribers: '約41万人',
     description: '国際スポーツクライミング連盟（IFSC）の公式チャンネル。世界カップ全大会のライブストリーミング（無料）、ハイライト、選手インタビューを配信。',
+    iconUrl: 'https://yt3.googleusercontent.com/sbuW-6hjyeMcTC_YuS9DMC-FTEiyrOmFhsxPfoOsDUQ0n4QVY_nrNxTjWP267E592w17WBxy=s900-c-k-c0x00ffffff-no-rj',
+    bannerUrl: 'https://yt3.googleusercontent.com/6m1sxVixLPUIgAjCDZWEyuTpXIiixrWJUOAzHZ9ZUBbNxIX6gOStBUx6wBxgvSLGdYjsGk77hA=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
 ];

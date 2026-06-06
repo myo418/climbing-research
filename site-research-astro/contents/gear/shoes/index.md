@@ -1,8 +1,8 @@
 ---
-title: 靴
+title: シューズ
 draft: true
 ---
 
-# 靴
+# シューズ
 
 （未作成）

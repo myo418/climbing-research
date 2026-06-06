@@ -8,9 +8,38 @@ title: サイト
 
 ## 一般情報
 
-### Climbing-net（ロクスノ／山と溪谷社）— グレード比較表
+### 山と溪谷社
 
-- URL: <https://www.climbing-net.com/general/グレード比較表/>
-- 内容: ボルダー（Japan / French / USA）とリード（Japan-USA / French / UIAA / Australia）の対応表
-- 出典の特徴: 段級グレードは提案者である**草野俊夫氏**による2段階（`+` あり／なし）の細分化を採用
-- 用途: [basics/grades](../../basics/grades/) の換算表のベース
+- URL: <https://www.yamakei.co.jp/>
+- 内容: 登山・クライミング分野の主要出版社。雑誌『山と溪谷』『ROCK & SNOW』などを刊行。書籍・雑誌・デジタルコンテンツを幅広く手がける。
+
+### Climbing-net（山と溪谷社）
+
+- URL: <https://www.climbing-net.com/>
+- Twitter: <https://x.com/ClimbingNet>
+- 内容: 山と溪谷社が運営するクライミング・ボルダリング総合サイト。ニュース・大会情報・コラムなど幅広く掲載。
+- グレード比較表: <https://www.climbing-net.com/general/グレード比較表/>（ボルダー・リード各種グレード換算。段級は草野俊夫氏による2段階細分化を採用）→ [basics/grades](../../basics/grades/) の換算表のベース
+
+### CLIMBERS（クライマーズ）
+
+- URL: <https://www.climbers-web.jp/>
+- 内容: クライミング・ボルダリングをテーマにした総合ウェブマガジン。大会レポート・選手インタビュー・技術解説など。
+
+## トポ・岩場情報
+
+### ROCKTOPO
+
+- URL: <https://www.rocktopo.net/>
+- 内容: クライミングルートの情報サイト。ユーザーが岩場・ルートを登録・公開でき、登ったルートの記録や友人との共有もできる。日本のボルダー・リードエリアのトポ情報を網羅。
+
+## 公式組織・協会
+
+### 公益社団法人日本山岳・スポーツクライミング協会（JMSCA）
+
+- URL: <https://www.jma-sangaku.or.jp/>
+- 内容: 日本の山岳・スポーツクライミングの統括団体。安全登山の啓発、夏山リーダー養成、山岳スキー競技、海外登山奨励金制度など山岳活動全般を担う。全国47都道府県の加盟団体で構成。
+
+### JMSCA スポーツクライミング
+
+- URL: <https://www.jma-climbing.org/>
+- 内容: JMSCAのスポーツクライミング競技専門サイト。国内外の大会情報・カレンダー・結果、選手・審判員・ルートセッター登録、国際大会派遣情報、ウェブマガジンなど。

@@ -55,12 +55,10 @@ appearances:
 
 <div class="image-row">
 
-![忍者返し岩](./ninja-gaeshi.jpg)
+![忍者返し岩](./ninja-gaeshi/ninja-gaeshi.jpg)
 
-![忍者返し岩](./ninja-gaeshi-2.jpg)
-
-![忍者返し岩](./ninja-gaeshi-3.jpg)
-
-![忍者返し岩](./ninja-gaeshi-4.jpg)
+![忍者返し岩](./ninja-gaeshi/ninja-gaeshi-2.jpg)
 
 </div>
+
+→ [忍者返し](/places/crag/mitake/ninja-gaeshi/)

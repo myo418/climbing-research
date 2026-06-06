@@ -9,7 +9,8 @@ order: 1
 
 - [書籍](./books/)
 - [資料](./materials/)
-- [映画](./movies/)
+- [映画・ドラマ・アニメ・漫画](./media/)
 - [サイト](./websites/)
 - [SNS](./sns/)
 - [YouTube](./youtube/)
+- [僕の好きな動画ベスト30](./best-videos/)

@@ -9,8 +9,13 @@ order: 99
 
 - [楢崎智亜](./tomoa-narasaki/)
 - [野口啓代](./akiyo-noguchi/)
-- [平山ユージ](./yuji-hirayama/)
 - [野中生萌](./miho-nonaka/)
+- [白石阿島](./ashima-shiraishi/)
+- [平山ユージ](./yuji-hirayama/)
+- [小山田大](./dai-koyamada/)
+- [池田功](./isao-ikeda/)
+- [草野俊達](./toshitatsu-kusano/)
+- [植田幹也](./mikiya-ueda/)
 
 ## 海外（現役）
 

@@ -1,0 +1,120 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import {
+  phrases,
+  SECTIONS,
+  RELATIONSHIP_LABELS,
+  FREQUENCY_LABELS,
+  type RelationshipTag,
+  type FrequencyTag,
+} from '../../../data/phrases';
+
+const bySection = new Map(SECTIONS.map((s) => [s, phrases.filter((p) => p.section === s)]));
+---
+
+<Layout title="よくある会話">
+  <h1>よくある会話</h1>
+  <p class="meta">{phrases.length} フレーズ</p>
+
+  <div class="phrase-filter">
+    <div class="phrase-filter-group">
+      <span class="phrase-filter-label">関係値</span>
+      {(Object.entries(RELATIONSHIP_LABELS) as [RelationshipTag, string][]).map(([key, label]) => (
+        <button class={`filter-btn ${key}`} data-group="relationship" data-value={key}>{label}</button>
+      ))}
+    </div>
+    <div class="phrase-filter-group">
+      <span class="phrase-filter-label">頻出度</span>
+      {(Object.entries(FREQUENCY_LABELS) as [FrequencyTag, string][]).map(([key, label]) => (
+        <button class={`filter-btn ${key}`} data-group="frequency" data-value={key}>{label}</button>
+      ))}
+    </div>
+  </div>
+
+  <div class="phrase-section">
+    {SECTIONS.map((section) => {
+      const items = bySection.get(section) ?? [];
+      if (items.length === 0) return null;
+      return (
+        <>
+          <h2 data-section={section}>{section}</h2>
+          {items.map((p) => (
+            <>
+              <h3 data-relationship={p.relationship} data-frequency={p.frequency}>
+                {p.phrase}
+                <span class="tags">
+                  <span class={p.relationship}>{RELATIONSHIP_LABELS[p.relationship]}</span><span class={p.frequency}>{FREQUENCY_LABELS[p.frequency]}</span>
+                </span>
+              </h3>
+              <p>{p.description}</p>
+            </>
+          ))}
+        </>
+      );
+    })}
+  </div>
+</Layout>
+
+<script>
+(function () {
+  const active: { relationship: string | null; frequency: string | null } = {
+    relationship: null,
+    frequency: null,
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('.filter-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.group as 'relationship' | 'frequency';
+      const value = btn.dataset.value!;
+      active[group] = active[group] === value ? null : value;
+      document.querySelectorAll<HTMLButtonElement>(`.filter-btn[data-group="${group}"]`).forEach((b) => {
+        b.dataset.active = String(b.dataset.value === active[group]);
+      });
+      applyFilters();
+    });
+  });
+
+  function applyFilters() {
+    const section = document.querySelector('.phrase-section');
+    if (!section) return;
+
+    section.querySelectorAll<HTMLElement>('h3').forEach((h3) => {
+      let visible = true;
+      if (active.relationship) visible = visible && h3.dataset.relationship === active.relationship;
+      if (active.frequency) visible = visible && h3.dataset.frequency === active.frequency;
+      h3.style.display = visible ? '' : 'none';
+      const sib = h3.nextElementSibling as HTMLElement | null;
+      if (sib && sib.tagName === 'P') sib.style.display = visible ? '' : 'none';
+    });
+
+    section.querySelectorAll<HTMLElement>('h2').forEach((h2) => {
+      let anyVisible = false;
+      let el = h2.nextElementSibling as HTMLElement | null;
+      while (el && el.tagName !== 'H2') {
+        if (el.tagName === 'H3' && el.style.display !== 'none') {
+          anyVisible = true;
+          break;
+        }
+        el = el.nextElementSibling as HTMLElement | null;
+      }
+      h2.style.display = anyVisible ? '' : 'none';
+    });
+  }
+})();
+</script>
+
+<style>
+  .meta {
+    color: var(--muted);
+    font-size: 13px;
+    margin: -12px 0 24px;
+  }
+  .phrase-section h3 .tags {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .phrase-section h3 .tags > span:last-child {
+    margin-left: -6px;
+  }
+</style>

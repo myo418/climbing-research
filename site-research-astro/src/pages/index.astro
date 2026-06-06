@@ -7,6 +7,7 @@ import { url } from '../lib/url';
 // 既存 index.md の frontmatter から title/draft/order を引き、説明はここで持つ。
 const SECTION_DESCRIPTIONS: Record<string, string> = {
   'basics': '種類・グレード・用語など、クライミングを理解する枠組み。',
+  'events': '大会・フェスティバル・映画上映など、クライミング関連のイベント。',
   'climbers': '有名クライマー、当事者の声、自分自身のクライミング歴。',
   'climbing-and-injury': '怪我の種類と発生経緯の事実整理。動機・心理は扱わない。',
   'gear': 'シューズ・チョーク・メーカー。身体に最も近い道具から。',
@@ -67,6 +68,14 @@ const startDate = '2026-04-21';
         怪我のリスクがあるにもかかわらず、なぜ人はクライミングに打ち込むのか。<br />
         動機・身体観・リスクとの向き合い方を、素材を積み上げながら掘り下げる。
       </p>
+      <div class="hero-photos" aria-hidden="true">
+        <img src={url('/climbers/alex-honnold.jpg')} alt="" />
+        <img src={url('/climbers/akiyo-noguchi.jpg')} alt="" />
+        <img src={url('/climbers/tomoa-narasaki.jpg')} alt="" />
+        <img src={url('/climbers/janja-garnbret.jpg')} alt="" />
+        <img src={url('/climbers/yuji-hirayama.jpg')} alt="" />
+        <img src={url('/climbers/adam-ondra.jpg')} alt="" />
+      </div>
     </header>
 
     <section class="questions">
@@ -197,6 +206,26 @@ const startDate = '2026-04-21';
     line-height: 1.85;
     color: var(--fg);
     max-width: 38em;
+  }
+
+  .hero-photos {
+    display: flex;
+    gap: 4px;
+    margin: 32px -56px 0;
+    width: calc(100% + 112px);
+    height: 160px;
+    overflow: hidden;
+  }
+  .hero-photos img {
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    border: none;
+    margin: 0;
   }
 
   /* --- セクション共通 --- */

@@ -340,9 +340,12 @@ const { title } = Astro.props;
   .prose .phrase-section .freq-mid  { background: #f0f0f0; color: #666;   border: 1px solid #ccc; }
   .prose .phrase-section .freq-low  { background: #fafafa; color: #aaa;   border: 1px solid #ddd; }
 
-  /* 頻出度タグを関係値タグに近づける */
+  /* h3 内: 頻出度タグを関係値タグに寄せる */
   .prose .phrase-section h3 [class^="freq"] {
-    margin-left: -8px;
+    margin-left: -6px;
+    border-radius: 20px;
+    font-size: 12px;
+    padding: 3px 10px;
   }
 
   /* フィルター UI */
