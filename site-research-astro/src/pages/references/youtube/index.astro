@@ -1,0 +1,288 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import {
+  channels,
+  TYPE_LABELS,
+  LANGUAGE_LABELS,
+  type ChannelType,
+  type Language,
+} from '../../../data/youtube';
+---
+
+<Layout title="YouTube">
+  <h1>YouTube</h1>
+  <p class="meta">{channels.length} チャンネル</p>
+
+  <div class="channel-filter">
+    <div class="channel-filter-group">
+      <span class="channel-filter-label">言語</span>
+      {(Object.entries(LANGUAGE_LABELS) as [Language, string][]).map(([key, label]) => (
+        <button class={`filter-btn lang-${key}`} data-group="language" data-value={key}>{label}</button>
+      ))}
+    </div>
+    <div class="channel-filter-group">
+      <span class="channel-filter-label">種別</span>
+      {(Object.entries(TYPE_LABELS) as [ChannelType, string][]).map(([key, label]) => (
+        <button class={`filter-btn type-${key}`} data-group="type" data-value={key}>{label}</button>
+      ))}
+    </div>
+  </div>
+
+  <div class="channel-grid">
+    {channels.map((ch) => (
+      <div
+        class="channel-card"
+        data-language={ch.language}
+        data-type={ch.type}
+      >
+        {ch.featuredVideoId ? (
+          <div class="channel-video" data-video-id={ch.featuredVideoId}>
+            <img
+              src={`https://img.youtube.com/vi/${ch.featuredVideoId}/mqdefault.jpg`}
+              alt={ch.featuredVideoTitle ?? ch.name}
+              loading="lazy"
+            />
+            <button class="play-btn" aria-label="動画を再生">
+              <svg viewBox="0 0 24 24" fill="white" width="48" height="48">
+                <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.6)" />
+                <polygon points="10,8 18,12 10,16" fill="white" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <div class="channel-video-placeholder">
+            <span class="channel-initial">{ch.name[0]}</span>
+          </div>
+        )}
+        <div class="channel-body">
+          <div class="channel-tags">
+            <span class={`tag lang-${ch.language}`}>{LANGUAGE_LABELS[ch.language]}</span>
+            <span class={`tag type-${ch.type}`}>{TYPE_LABELS[ch.type]}</span>
+            {ch.subscribers && <span class="tag subscribers">{ch.subscribers}</span>}
+          </div>
+          <h3 class="channel-name">
+            <a href={ch.url} target="_blank" rel="noopener noreferrer">{ch.name}</a>
+          </h3>
+          <p class="channel-desc">{ch.description}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</Layout>
+
+<script>
+// ── フィルター ────────────────────────────────────────────
+(function () {
+  const active: { language: string | null; type: string | null } = {
+    language: null,
+    type: null,
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('.filter-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.group as 'language' | 'type';
+      const value = btn.dataset.value!;
+      active[group] = active[group] === value ? null : value;
+      document.querySelectorAll<HTMLButtonElement>(`.filter-btn[data-group="${group}"]`).forEach((b) => {
+        b.dataset.active = String(b.dataset.value === active[group]);
+      });
+      applyFilters();
+    });
+  });
+
+  function applyFilters() {
+    document.querySelectorAll<HTMLElement>('.channel-card').forEach((card) => {
+      let visible = true;
+      if (active.language) visible = visible && card.dataset.language === active.language;
+      if (active.type) visible = visible && card.dataset.type === active.type;
+      card.style.display = visible ? '' : 'none';
+    });
+  }
+})();
+
+// ── 動画 click-to-play ────────────────────────────────────
+document.querySelectorAll<HTMLElement>('.channel-video').forEach((wrapper) => {
+  wrapper.addEventListener('click', () => {
+    const id = wrapper.dataset.videoId;
+    if (!id) return;
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+    iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+    iframe.allowFullscreen = true;
+    iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;';
+    wrapper.style.cursor = 'default';
+    wrapper.innerHTML = '';
+    wrapper.appendChild(iframe);
+  });
+});
+</script>
+
+<style>
+  .meta {
+    color: var(--muted);
+    font-size: 13px;
+    margin: -12px 0 24px;
+  }
+
+  /* フィルター */
+  .channel-filter {
+    margin-bottom: 24px;
+    padding: 12px 16px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .channel-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .channel-filter-label {
+    font-size: 11px;
+    color: #888;
+    width: 28px;
+    flex-shrink: 0;
+  }
+  .filter-btn {
+    cursor: pointer;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    opacity: 0.45;
+    transition: opacity 0.15s;
+  }
+  .filter-btn:hover { opacity: 0.75; }
+  .filter-btn[data-active="true"] { opacity: 1; outline: 2px solid currentColor; outline-offset: 1px; }
+
+  /* 言語タグ色 */
+  .lang-ja { background: #deeaf8; color: #1a4f8a; border-color: #9ec3e8; }
+  .lang-en { background: #f0eaff; color: #5a2a9a; border-color: #c9b0ee; }
+  /* 種別タグ色 */
+  .type-individual  { background: #dff0df; color: #2a6b2a; border-color: #b5d9b5; }
+  .type-gym         { background: #f5ead4; color: #7a5200; border-color: #e0cc99; }
+  .type-brand       { background: #f5dede; color: #8b2020; border-color: #e0b0b0; }
+  .type-media       { background: #eae8f0; color: #4a3d6b; border-color: #c5bed9; }
+  .type-organization{ background: #e8f5f0; color: #1a5c45; border-color: #a0d0c0; }
+
+  /* グリッド */
+  .channel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  /* カード */
+  .channel-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg);
+    transition: box-shadow 0.15s;
+  }
+  .channel-card:hover {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  /* サムネイル */
+  .channel-video {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #111;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .channel-video img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border: none;
+    margin: 0;
+    transition: opacity 0.15s;
+  }
+  .channel-video:hover img { opacity: 0.85; }
+  .play-btn {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  .channel-video-placeholder {
+    aspect-ratio: 16 / 9;
+    background: var(--sidebar-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .channel-initial {
+    font-size: 40px;
+    color: var(--muted);
+    font-weight: 700;
+    opacity: 0.3;
+  }
+
+  /* カード本文 */
+  .channel-body {
+    padding: 12px 14px 14px;
+  }
+  .channel-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .tag.subscribers {
+    background: #f0f0f0;
+    color: #666;
+    border: 1px solid #ccc;
+    font-weight: 400;
+  }
+  .channel-name {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    line-height: 1.4;
+  }
+  .channel-name a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .channel-name a:hover {
+    color: var(--link);
+    text-decoration: underline;
+  }
+  .channel-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  @media print {
+    .channel-filter { display: none; }
+    .channel-grid { grid-template-columns: 1fr 1fr; }
+    .channel-video { display: none; }
+  }
+</style>
