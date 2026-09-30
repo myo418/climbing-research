@@ -1,0 +1,16 @@
+dist/
+node_modules/
+.astro/
+.lineart-preview/
+
+# 写真の原本（1枚20〜70MB）。縮小した public/photos/web/ の方をコミットする
+public/photos/*
+!public/photos/web/
+
+# 線画の案。採用したものだけ public/lineart に出る。案は手元で選ぶためのもので共有しない
+src/lineart/candidates/
+
+# 動きの可視化。変換した mp4 と静止画は Cloudflare R2 に置く。
+# 手元のこれは変換をやり直さずに済ませるための控えで、共有しない。
+# サイトが読む一覧は src/data/move-visualizer.json（R2のURLが入る）の方
+.move-visualizer-cache/

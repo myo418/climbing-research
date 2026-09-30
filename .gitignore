@@ -22,3 +22,19 @@ dist/
 .vercel/
 
 .playwright-mcp/
+
+# 写真の原本（1枚20〜70MBあるのでコミットしない）
+# 表示用に縮小した web/ だけをリポジトリに入れる。原本はローカル・外部ストレージで保持する
+site-research-astro/public/photos/*
+!site-research-astro/public/photos/web/
+
+# 線画の目視確認用に書き出すPNG
+site-research-astro/.lineart-preview/
+
+# Blender（展示空間）: 作業ファイルとバックアップは履歴に残さない。
+# 書き出したレンダリング画像だけコミットする。
+*.blend
+*.blend[0-9]
+
+# 展示検討用に集めた他者の写真。手元の資料でありサイトには出さない
+site-research-astro/contents/design/exhibition/references/*.jpg
