@@ -1,0 +1,739 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { voices, TOPICS, TOPIC_META } from '../../../data/voices';
+import { TOPIC_ICONS } from '../../../data/voice-icons';
+
+// 揺れ・傾き・丸み・幅は1枚ずつ違う値にする。乱数は種から作る固定の式なので、
+// ビルドし直しても同じ散らばりが出る（差分が暴れない）。
+function rand(seed: number): number {
+  let t = (seed + 0x6d2b79f5) >>> 0;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+// 札の高さ。表と裏で形が変わらないよう全枚共通
+const H = 250;
+
+type Pt = [number, number];
+
+// V から T の方へ r だけ進んだ点。角を丸めるときの入り口・出口に使う
+function toward(v: Pt, t: Pt, r: number): Pt {
+  const dx = t[0] - v[0];
+  const dy = t[1] - v[1];
+  const len = Math.hypot(dx, dy) || 1;
+  const k = Math.min(r, len / 2) / len;
+  return [v[0] + dx * k, v[1] + dy * k];
+}
+
+// 角を丸めた多角形のパス。各頂点を、手前で止めて → 頂点を制御点に曲げて → 次の辺へ、で繋ぐ
+function roundedPolygon(pts: Pt[], radii: number[]): string {
+  const n = pts.length;
+  const f = (p: Pt) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
+  let d = '';
+  for (let i = 0; i < n; i++) {
+    const v = pts[i];
+    const prev = pts[(i + n - 1) % n];
+    const next = pts[(i + 1) % n];
+    const a = toward(v, prev, radii[i]);
+    const b = toward(v, next, radii[i]);
+    d += `${i === 0 ? 'M' : 'L'}${f(a)}Q${f(v)} ${f(b)}`;
+  }
+  return `${d}Z`;
+}
+
+// 札1枚ぶんの輪郭。四角い角丸の七角形。
+// 四隅に加えて、四辺のうち三辺の途中に頂点を1つずつ置く（どの辺を飛ばすかは札ごとに違う）。
+// 辺の途中の頂点は大きく丸めるので、角ではなくゆるい膨らみ・へこみとして出る。
+function cardShape(seed: number, w: number): string {
+  const r = (i: number) => rand(seed * 41 + i);
+  const ix = w * 0.05;
+  const iy = H * 0.04;
+  const clamp = (p: Pt): Pt => [
+    Math.max(1, Math.min(w - 1, p[0])),
+    Math.max(1, Math.min(H - 1, p[1])),
+  ];
+
+  const corners: Pt[] = [
+    [8 + r(1) * ix, 8 + r(2) * iy],
+    [w - 8 - r(3) * ix, 8 + r(4) * iy],
+    [w - 8 - r(5) * ix, H - 8 - r(6) * iy],
+    [8 + r(7) * ix, H - 8 - r(8) * iy],
+  ];
+
+  const skip = Math.floor(r(9) * 4); // 頂点を足さない辺
+  const pts: Pt[] = [];
+  const isCorner: boolean[] = [];
+
+  for (let e = 0; e < 4; e++) {
+    pts.push(corners[e]);
+    isCorner.push(true);
+    if (e === skip) continue;
+    const a = corners[e];
+    const b = corners[(e + 1) % 4];
+    const t = 0.38 + r(10 + e) * 0.24;
+    const push = (r(20 + e) * 2 - 1) * 7;
+    const nx = -(b[1] - a[1]);
+    const ny = b[0] - a[0];
+    const len = Math.hypot(nx, ny) || 1;
+    pts.push(
+      clamp([
+        a[0] + (b[0] - a[0]) * t + (nx / len) * push,
+        a[1] + (b[1] - a[1]) * t + (ny / len) * push,
+      ]),
+    );
+    isCorner.push(false);
+  }
+
+  const radii = pts.map((_, i) =>
+    isCorner[i] ? 10 + rand(seed * 97 + i) * 26 : 34 + rand(seed * 97 + i) * 40,
+  );
+  return roundedPolygon(pts.map(clamp), radii);
+}
+
+const groups = TOPICS.map((topic, gi) => {
+  const mine = voices.filter((v) => v.topic === topic);
+  return {
+    topic,
+    meta: TOPIC_META[topic],
+    // 並びも無作為にする。データに書いた順が枠の中にそのまま出ないように混ぜる
+    cards: mine
+      .map((voice, i) => ({ voice, key: rand(gi * 1000 + i * 7 + 3) }))
+      .sort((a, b) => a.key - b.key)
+      .map(({ voice }, i) => {
+        const s = gi * 137 + i * 11 + 1;
+        const w = Math.round(200 + rand(s + 11) * 35);
+        // 長い一言ほど小さく出す。こうしないと文節が札の幅に入らず、
+        // 「期間限定配／信のアニメ」のように語の途中で折れてしまう
+        const n = voice.text.length;
+        const fs = n <= 4 ? 28 : n <= 6 ? 26 : n <= 8 ? 24 : n <= 10 ? 21 : 19;
+        return {
+          voice,
+          w,
+          // 表と裏は同じ形を使う
+          path: cardShape(s, w),
+          style: [
+            `--w:${w}px`,
+            `--fs:${fs}px`,
+            // 置き方を無造作にする。左右と上下の空きを1枚ずつ変え、
+            // 負の値も許して、寄って重なる札と離れて浮く札を混ぜる
+            `--mx:${Math.round(-10 + rand(s + 21) * 34)}px`,
+            `--my:${Math.round(-12 + rand(s + 31) * 52)}px`,
+            `--mb:${Math.round(rand(s + 91) * 26)}px`,
+            `--tilt:${(rand(s + 101) * 14 - 7).toFixed(2)}deg`,
+            `--dx:${(rand(s + 41) * 2 - 1).toFixed(2)}%`,
+            `--dy:${(rand(s + 51) * 8 - 4).toFixed(1)}px`,
+            `--rot:${(rand(s + 61) * 5 - 2.5).toFixed(2)}deg`,
+            `--dur:${(7 + rand(s + 71) * 6).toFixed(1)}s`,
+            `--delay:-${(rand(s + 81) * 8).toFixed(1)}s`,
+          ].join(';'),
+        };
+      }),
+  };
+});
+---
+
+<Layout title="クライマー100人に聞いた" fullscreen>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Kurenaido&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div class="bar">
+    <h1>クライマー100人に聞いた</h1>
+    <p class="hint">クリックするとエピソードが読める</p>
+  </div>
+
+  <div class="stage" id="stage">
+    {groups.map((g) => (
+      <section class="panel" data-topic={g.topic} style={`--c:${g.meta.color}`}>
+        <div class="cap">
+          <span class="label"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+               stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round" set:html={TOPIC_ICONS[g.topic]} />{g.meta.label}</span>
+          <span class="n">{g.cards.length}</span>
+        </div>
+
+        <div class="open-head">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+               stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" stroke-linejoin="round" set:html={TOPIC_ICONS[g.topic]} />
+          <span class="label">{g.meta.label}</span>
+          <button class="close" type="button" aria-label="閉じる" title="閉じる（Esc）">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6 L18 18 M18 6 L6 18" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="cards">
+          <div class="cloud">
+          {g.cards.map(({ voice, style, w, path }) => (
+            <button class="card" type="button" aria-expanded="false" data-text={voice.text} style={style}>
+              <span class="flip">
+                <span class="face front">
+                  <svg class="paper" viewBox={`0 0 ${w} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+                    <path d={path} />
+                  </svg>
+                  <span class="text">{voice.text}</span>
+                </span>
+                <span class="face back">
+                  <svg class="paper" viewBox={`0 0 ${w} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+                    <path d={path} />
+                  </svg>
+                  <span class="story">{voice.story}</span>
+                  {/* 年代と歴はいったん出さない。データ（voices.ts の who）は残してある */}
+                </span>
+              </span>
+            </button>
+          ))}
+          </div>
+        </div>
+
+        <button class="open-btn" type="button" aria-label={`${g.meta.label}を開く`}></button>
+      </section>
+    ))}
+  </div>
+</Layout>
+
+<script>
+  {
+    const stage = document.getElementById('stage')!;
+    const panels = Array.from(stage.querySelectorAll<HTMLElement>('.panel'));
+
+    const closeCards = (except?: HTMLButtonElement) => {
+      stage.querySelectorAll<HTMLButtonElement>('.card').forEach((c) => {
+        if (c !== except) c.setAttribute('aria-expanded', 'false');
+      });
+    };
+
+    // 枚数が増えても画面からはみ出さないよう、札の塊ごと縮めて収める。
+    // ただ縮めるだけだと横が余るので、先に塊を横へ広げてから縮める。
+    // 倍率 s のとき、塊は box幅/s だけ広げられ、使える高さは box高/s になる。
+    // 「広げた状態の高さ × s ≤ box高」を満たす最大の s を二分探索で探す。
+    const fit = (panel: HTMLElement) => {
+      const box = panel.querySelector<HTMLElement>('.cards')!;
+      const cloud = panel.querySelector<HTMLElement>('.cloud')!;
+      const w = box.clientWidth;
+      const room = box.clientHeight;
+      if (!w || !room) return;
+
+      // offsetHeight は変形（scale）の影響を受けないので、
+      // 動きの途中でも「素の高さ」が取れる
+      const fits = (s: number) => {
+        cloud.style.width = `${w / s}px`;
+        return cloud.offsetHeight * s <= room;
+      };
+
+      let s = 1;
+      if (!fits(1)) {
+        let lo = 0.05;
+        let hi = 1;
+        for (let i = 0; i < 12; i++) {
+          const mid = (lo + hi) / 2;
+          if (fits(mid)) lo = mid;
+          else hi = mid;
+        }
+        s = lo;
+      }
+      cloud.style.width = `${w / s}px`;
+      cloud.style.transform = s < 1 ? `scale(${s.toFixed(4)})` : 'none';
+    };
+
+    // 表示されている枠すべてを測り直す（閉じている枠も中身を縮めて見せている）
+    const fitAll = () => panels.forEach(fit);
+
+    // 裏返すと1.5倍になる。端の札はふくらんだぶんが枠から出て見切れるので、
+    // 出た量だけ中央へ寄せる（出ていない札は動かさない）
+    const nudge = (card: HTMLButtonElement) => {
+      const panel = card.closest<HTMLElement>('.panel')!;
+      const box = panel.querySelector<HTMLElement>('.cards')!;
+      const flip = card.querySelector<HTMLElement>('.flip')!;
+      const p = panel.getBoundingClientRect();
+      const r = card.getBoundingClientRect();
+      // 札の塊は縮小表示しているので、画面上の量を元の座標系に戻す
+      const scale = r.width / card.offsetWidth || 1;
+      const ex = r.width * 0.25;
+      const ey = r.height * 0.25;
+      const m = 6;
+      // 上だけは見出しに潜り込まないよう、札の置き場の上端で止める
+      const top = box.getBoundingClientRect().top;
+
+      let dx = 0;
+      let dy = 0;
+      if (r.left - ex < p.left + m) dx = p.left + m - (r.left - ex);
+      else if (r.right + ex > p.right - m) dx = p.right - m - (r.right + ex);
+      if (r.top - ey < top) dy = top - (r.top - ey);
+      else if (r.bottom + ey > p.bottom - m) dy = p.bottom - m - (r.bottom + ey);
+
+      flip.style.setProperty('--tx', `${(dx / scale).toFixed(1)}px`);
+      flip.style.setProperty('--ty', `${(dy / scale).toFixed(1)}px`);
+    };
+
+    // 開いている枠と札をURLに残す。リロードしても同じ場所に戻り、リンクとして渡せる。
+    // 枠の開け閉めは履歴に積む（＝ブラウザの戻るで一覧に戻れる）。
+    // 札の裏返しは積まずに書き換えるだけ（戻るたびに1枚ずつ戻るのは煩わしいため）。
+    const writeUrl = (push: boolean) => {
+      const open = panels.find((p) => p.hasAttribute('data-open'));
+      const card = stage.querySelector<HTMLButtonElement>('.card[aria-expanded="true"]');
+      const u = new URL(location.href);
+      if (open) u.searchParams.set('q', open.dataset.topic!);
+      else u.searchParams.delete('q');
+      if (open && card) u.searchParams.set('a', card.dataset.text!);
+      else u.searchParams.delete('a');
+      const href = `${u.pathname}${u.search}${u.hash}`;
+      // 同じ状態を積み直さない
+      if (push && href !== `${location.pathname}${location.search}${location.hash}`) {
+        history.pushState(null, '', href);
+      } else {
+        history.replaceState(null, '', href);
+      }
+    };
+
+    // URLが指している枠と札を取り出す
+    const readUrl = () => {
+      const q = new URLSearchParams(location.search);
+      const topic = q.get('q');
+      const panel = (topic && panels.find((p) => p.dataset.topic === topic)) || null;
+      const text = q.get('a');
+      const card =
+        (panel &&
+          text &&
+          Array.from(panel.querySelectorAll<HTMLButtonElement>('.card')).find(
+            (c) => c.dataset.text === text,
+          )) ||
+        null;
+      return { panel, card };
+    };
+
+    // 画面をその状態にする。URLには触らない
+    const setState = (panel: HTMLElement | null, card: HTMLButtonElement | null) => {
+      closeCards();
+      panels.forEach((p) => p.toggleAttribute('data-open', p === panel));
+      stage.toggleAttribute('data-open', !!panel);
+      fitAll();
+      if (panel && card) {
+        nudge(card);
+        card.setAttribute('aria-expanded', 'true');
+      }
+    };
+
+    const flipCard = (card: HTMLButtonElement, open: boolean) => {
+      closeCards(card);
+      if (open) nudge(card);
+      card.setAttribute('aria-expanded', String(open));
+      writeUrl(false);
+    };
+
+    const openPanel = (panel: HTMLElement | null) => {
+      setState(panel, null);
+      writeUrl(true);
+    };
+
+    fitAll();
+
+    // 最初にURLが指している状態へ。ここは履歴に積まない
+    {
+      const { panel, card } = readUrl();
+      if (panel) {
+        setState(panel, card);
+        writeUrl(false); // 消えた札を指していたら、その分だけURLから落とす
+      }
+    }
+
+    // ブラウザの戻る・進むでURLが変わったら、その状態に合わせる
+    window.addEventListener('popstate', () => {
+      const { panel, card } = readUrl();
+      setState(panel, card);
+    });
+
+    // 最初の1回を測り終えてから、大きさの変化に動きを付ける
+    requestAnimationFrame(() => stage.setAttribute('data-anim', ''));
+
+    window.addEventListener('resize', fitAll);
+    // webフォントが遅れて入ると高さが変わるので、読み込み後にもう一度測る
+    document.fonts?.ready.then(fitAll);
+
+    panels.forEach((panel) => {
+      panel.querySelector('.open-btn')!.addEventListener('click', () => openPanel(panel));
+      panel.querySelector('.close')!.addEventListener('click', () => openPanel(null));
+
+      panel.querySelectorAll<HTMLButtonElement>('.card').forEach((card) => {
+        card.addEventListener('click', () => {
+          flipCard(card, card.getAttribute('aria-expanded') !== 'true');
+        });
+      });
+    });
+
+    // 裏返した札を開いたまま別のところを触ったら、札を伏せる。
+    // 札そのものは各自の処理で裏返るので触らない。枠の開閉ボタンは履歴を積むので、
+    // ここでURLを書き換えるとその積み直しを壊す。どちらも素通りさせる。
+    document.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      if (t.closest('.card') || t.closest('.open-btn') || t.closest('.close')) return;
+      if (!stage.querySelector('.card[aria-expanded="true"]')) return;
+      closeCards();
+      writeUrl(false);
+    });
+
+    // Esc は、開いている札 → 開いている枠 の順に閉じる
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (stage.querySelector('.card[aria-expanded="true"]')) {
+        closeCards();
+        writeUrl(false);
+      } else {
+        openPanel(null);
+      }
+    });
+  }
+</script>
+
+<style>
+  /* 見出しは他のページと同じ大きさ・同じ位置 */
+  h1 {
+    font-size: 28px;
+    line-height: 1.3;
+    margin: 0;
+  }
+  .bar {
+    flex: none;
+    padding: 28px 24px 16px;
+  }
+  .bar .hint {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* 7つの枠を画面いっぱいに敷き詰める。最後の1つだけ横2つぶん取って8マスを埋める */
+  .stage {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 10px;
+    padding: 0 24px 24px;
+  }
+  .panel:last-child {
+    grid-column: span 2;
+  }
+
+  .panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border: 1px solid color-mix(in srgb, var(--c) 45%, #fafaf8);
+    background: color-mix(in srgb, var(--c) 6%, #fafaf8);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* 枠が1つ開いたら、それ以外は隠して開いた枠が全面を取る */
+  .stage[data-open] .panel {
+    display: none;
+  }
+  .stage[data-open] .panel[data-open] {
+    display: flex;
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    animation: appear 0.25s ease-out;
+  }
+  @keyframes appear {
+    from { opacity: 0; transform: scale(0.99); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* 閉じているときの見出し。枠の上に置き、下に中身を小さく敷く */
+  .cap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 12px 10px;
+    text-align: center;
+  }
+  /* 見出しの1行目の頭に置く。文字の大きさに連れて大きくなるよう em で持つ */
+  .cap .ico {
+    display: inline-block;
+    vertical-align: -0.22em;
+    width: 1.25em;
+    height: 1.25em;
+    margin-right: 0.3em;
+    color: color-mix(in srgb, var(--c) 72%, #141414);
+  }
+  .cap .label {
+    font-size: clamp(14px, 1.3vw, 19px);
+    font-weight: 700;
+    line-height: 1.35;
+    color: color-mix(in srgb, var(--c) 82%, #141414);
+  }
+  .cap .n {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .panel[data-open] .cap {
+    display: none;
+  }
+
+  /* 閉じている枠の全面を覆う、押すためだけのボタン */
+  .open-btn {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .open-btn:hover {
+    background: color-mix(in srgb, var(--c) 12%, transparent);
+  }
+  .open-btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--c) 70%, #1a1a1a);
+    outline-offset: -3px;
+  }
+  .panel[data-open] .open-btn {
+    display: none;
+  }
+
+  /* 開いているときの見出し */
+  .open-head {
+    display: none;
+    align-items: baseline;
+    gap: 14px;
+    padding: 14px 18px;
+    border-bottom: 2px solid color-mix(in srgb, var(--c) 45%, #fafaf8);
+  }
+  .panel[data-open] .open-head {
+    display: flex;
+  }
+  .open-head .ico {
+    width: 26px;
+    height: 26px;
+    align-self: center;
+    color: color-mix(in srgb, var(--c) 72%, #141414);
+  }
+  .open-head .label {
+    font-size: 22px;
+    font-weight: 700;
+    color: color-mix(in srgb, var(--c) 82%, #141414);
+  }
+  .close {
+    margin-left: auto;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    cursor: pointer;
+    /* 枠の色で塗って白抜きにする。淡い地色の中で見失わないように */
+    background: color-mix(in srgb, var(--c) 88%, #141414);
+    border: 0;
+    border-radius: 999px;
+  }
+  .close:hover {
+    background: #141414;
+  }
+  .close svg {
+    width: 20px;
+    height: 20px;
+    stroke: #fff;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    fill: none;
+  }
+
+  /* 札の置き場。閉じているときも中身を縮めて見せる。
+     はみ出す高さは .cloud ごと縮めて収めるので、どちらの状態でもスクロールしない */
+  .cards {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px 12px;
+    min-height: 0;
+    flex: 1;
+    /* 収まる大きさは .cloud 側で計算済み。
+       裏返した札が1.5倍にふくらむぶんは、枠の余白へ逃がす */
+    overflow: visible;
+  }
+  .panel[data-open] .cards {
+    padding: 14px 18px 18px;
+  }
+  .cloud {
+    display: flex;
+    /* 収める計算で箱より広くするので、flex に縮め返されないようにする */
+    flex: none;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    /* 札の間隔は1枚ずつの margin で付ける。ここは最低限だけ */
+    gap: 0 2px;
+    width: 100%;
+    transform-origin: center center;
+  }
+  /* 押したときに中身が広がって見えるよう、大きさの変化に時間をかける */
+  .stage[data-anim] .cloud {
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+
+  /* 札。高さは全枚共通で、表と裏はまったく同じ大きさ・同じ丸み */
+  /* 閉じている間は縮小表示なので、触れないし揺れない */
+  .panel:not([data-open]) .card,
+  .panel:not([data-open]) .face {
+    animation: none;
+    pointer-events: none;
+  }
+
+  .card {
+    position: relative;
+    width: var(--w);
+    height: 250px;
+    margin: var(--my) 0 var(--mb) var(--mx);
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    perspective: 1000px;
+    animation: float var(--dur) ease-in-out var(--delay) infinite alternate;
+  }
+
+  .flip {
+    display: block;
+    position: relative;
+    height: 100%;
+    transform: rotate(var(--tilt));
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  /* 裏返したときは1.5倍に。裏は字が多いので、そのままだと詰まって読めない。
+     --tx / --ty は端の札を枠の内側へ寄せるぶん（JSが入れる） */
+  .card[aria-expanded='true'] .flip {
+    transform: translate(var(--tx, 0), var(--ty, 0)) rotateY(180deg) scale(1.5);
+  }
+
+  .face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 24px;
+    backface-visibility: hidden;
+  }
+  /* 札の形。四角に近い多角形の角を丸めたもの。1枚ずつ形が違う */
+  .paper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+  .paper path {
+    fill: color-mix(in srgb, var(--c) 13%, #fafaf8);
+    stroke: color-mix(in srgb, var(--c) 34%, #fafaf8);
+    stroke-width: 1;
+    transition: fill 0.15s, stroke 0.15s;
+  }
+  /* 裏はトピックの色で塗りつぶして白抜き。12pxの文章を白で読ませるので、
+     どの色でも白とのコントラストが4.5:1を超えるところまで濃くする */
+  .back .paper path {
+    fill: color-mix(in srgb, var(--c) 62%, #141414);
+    stroke: color-mix(in srgb, var(--c) 80%, #141414);
+  }
+  /* 表は一言だけ。中央に置く */
+  .front {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  /* 裏は文章なので、輪郭の角に文字が当たらないよう余白を厚めに取り、上下中央に置く */
+  .back {
+    transform: rotateY(180deg);
+    justify-content: center;
+    padding: 28px 30px;
+    color: #fff;
+  }
+
+  /* 開いている札と触れている札は、読ませるので揺れを止める */
+  .card[aria-expanded='true'] {
+    z-index: 5;
+    animation-play-state: paused;
+  }
+  .card[aria-expanded='true'] .face,
+  .card:hover .face,
+  .card:hover {
+    animation-play-state: paused;
+  }
+  .card:hover .front .paper path {
+    fill: color-mix(in srgb, var(--c) 22%, #fafaf8);
+    stroke: color-mix(in srgb, var(--c) 58%, #fafaf8);
+  }
+  .card:focus-visible .face {
+    outline: 2px solid color-mix(in srgb, var(--c) 70%, #1a1a1a);
+    outline-offset: 2px;
+  }
+
+  @keyframes float {
+    from { transform: translate(0, 0) rotate(0deg); }
+    to { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card, .face { animation: none; }
+    .flip { transition: none; }
+    .stage[data-open] .panel[data-open] { animation: none; }
+  }
+
+  /* 表は一言なので油性マジック、裏は文章なので細いサインペン */
+  /* 1行に収めようとせず、2行になってもいいので大きく出す */
+  .text {
+    font-family: 'Yusei Magic', var(--font-sans);
+    font-weight: 400;
+    font-size: var(--fs);
+    line-height: 1.35;
+    letter-spacing: 0.02em;
+    /* 「推しの／ライブ」のように文節で折り返す。対応していないブラウザでは
+       この行が無視されて、これまでどおりどこでも折り返す */
+    word-break: auto-phrase;
+    /* 文節が札の幅より長いときは、文節の途中でも折る（はみ出すよりはいい）。
+       3行になってもよい */
+    overflow-wrap: anywhere;
+    /* 行の長さをそろえる（1行目だけ長くて2行目が1文字、を防ぐ） */
+    text-wrap: balance;
+  }
+  .story {
+    font-family: 'Zen Kurenaido', var(--font-sans);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .who {
+    margin-top: auto;
+    padding-top: 8px;
+    text-align: right;
+    font-family: 'Zen Kurenaido', var(--font-sans);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* 幅が足りないときは枠を縦に積む */
+  @media (max-width: 900px) {
+    .stage {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+    }
+    .panel:last-child {
+      grid-column: span 2;
+    }
+  }
+</style>
