@@ -1,0 +1,118 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CragCard from '../../../components/CragCard.astro';
+import { pages, getPageById } from '../../../lib/pages';
+import { url } from '../../../lib/url';
+
+// 各岩場フォルダの画像。frontmatter の `card:` にファイル名を書くと、その1枚がカードに出る。
+const files = import.meta.glob<ImageMetadata>(
+  '../../../../contents/places/crag/*/*.{jpg,jpeg,JPG,png,webp}',
+  { eager: true, import: 'default' },
+);
+const images: Record<string, ImageMetadata> = {};
+for (const [path, urlStr] of Object.entries(files)) {
+  const m = path.match(/crag\/([^/]+)\/([^/]+)$/);
+  if (m) images[`${m[1]}/${m[2]}`] = urlStr;
+}
+
+const indexPage = getPageById('places/crag');
+const fm = indexPage?.frontmatter ?? {};
+const title = (fm.title ?? '岩場') as string;
+const Content = indexPage?.Content;
+
+// places/crag/<slug> の1階層だけ拾う（mitake/ninja-gaeshi のような課題ページは除く）。
+const crags = pages
+  .filter((p) => /^places\/crag\/[^/]+$/.test(p.id))
+  .map((p) => {
+    const f = p.frontmatter ?? {};
+    const slug = p.id.split('/').pop()!;
+    return {
+      id: p.id,
+      slug,
+      name: (f.title ?? slug) as string,
+      reading: f.reading as string | undefined,
+      area: f.area as string | undefined,
+      summary: f.summary as string | undefined,
+      disciplines: (f.disciplines ?? []) as string[],
+      rock: f.rock as string | undefined,
+      scale: f.scale as string | undefined,
+      region: (f.region ?? '国内') as string,
+      order: (f.order ?? 99) as number,
+      image: f.card ? images[`${slug}/${f.card}`] : undefined,
+    };
+  })
+  .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name, 'ja'));
+
+const groups = [
+  { label: '国内', items: crags.filter((c) => c.region !== '海外') },
+  { label: '海外', items: crags.filter((c) => c.region === '海外') },
+];
+---
+
+<Layout title={title}>
+  <p class="breadcrumb">places/crag.md</p>
+  <h1>{title}</h1>
+  {fm.lead && <p class="lead">{fm.lead}</p>}
+
+  {groups.map((group) => (
+    group.items.length > 0 && (
+      <section class="group">
+        <h2>{group.label}</h2>
+        <div class="grid">
+          {group.items.map((c) => (
+            <CragCard
+              href={url(`/${c.id}/`)}
+              name={c.name}
+              reading={c.reading}
+              area={c.area}
+              summary={c.summary}
+              disciplines={c.disciplines}
+              rock={c.rock}
+              scale={c.scale}
+              image={c.image}
+            />
+          ))}
+        </div>
+      </section>
+    )
+  ))}
+
+  {Content && (
+    <div class="notes">
+      <Content />
+    </div>
+  )}
+</Layout>
+
+<style>
+  .breadcrumb {
+    color: var(--muted);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    margin: 0 0 16px;
+  }
+  h1 {
+    margin: 0 0 12px;
+  }
+  .lead {
+    margin: 0 0 8px;
+    line-height: 1.9;
+  }
+  .group h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 32px 0 12px;
+    letter-spacing: 0.02em;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+  }
+  .notes {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+</style>
