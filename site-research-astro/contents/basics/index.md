@@ -6,6 +6,7 @@ title: 基礎知識
 
 クライミングを理解するための基本的な枠組み。
 
-- [クライミングの種類](./genres/)
-- [グレード](./grades/)
-- [用語集](./glossary/)
+- [歴史と発祥](/basics/history/)
+- [クライミングの種類](/basics/genres/)
+- [グレード](/basics/grades/)
+- [用語集](/basics/glossary/)

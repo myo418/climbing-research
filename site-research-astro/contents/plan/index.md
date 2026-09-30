@@ -70,5 +70,5 @@ Astro サイトの骨組みは組み上がっている。大カテゴリ（基�
 
 - [週次レポート](../weekly-report/) — 毎週の進捗
 - [リサーチ方法](../research-methods/) — 方法論・インタビュー設計
-- [クライミングと怪我](../climbing-and-injury/) — 核テーマ
+- [クライミングと怪我](/training/climbing-and-injury/) — 核テーマ
 - [クライマー](../climbers/) — 対象人物群

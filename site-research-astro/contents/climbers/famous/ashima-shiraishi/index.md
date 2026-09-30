@@ -10,6 +10,8 @@ disciplines:
   - ボルダー
   - リード
 known_for: 史上最年少クラスでの9a達成、ユース世界選手権での活躍
+image: /climbers/ashima-shiraishi.jpg
+image_source: Wikimedia Commons
 links:
   wikipedia: https://en.wikipedia.org/wiki/Ashima_Shiraishi
 ascents:

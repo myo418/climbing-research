@@ -5,7 +5,7 @@ order: 1
 
 # インタビュー方法
 
-関連: [climbing-and-injury](../../climbing-and-injury/) / [趣味クライマーインタビュー](../../climbers/interview/)
+関連: [クライミングと怪我](/training/climbing-and-injury/) / [趣味クライマーインタビュー](../../climbers/interview/)
 
 本リサーチの中心的な一次情報源は**クライマー本人の語り**。「なぜクライミングが好きになり、のめり込み、怪我のリスクがあっても続けているのか」をそこから汲み取るための**プロセス設計**をまとめる。
 

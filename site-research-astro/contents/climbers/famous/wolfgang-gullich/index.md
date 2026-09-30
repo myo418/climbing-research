@@ -11,7 +11,7 @@ image_source: Wikimedia Commons
 disciplines:
   - リード
   - ボルダー
-known_for: 世界初の9a（Action Directe）完登、カンパスボード考案者
+known_for: 世界初の9a（Action Directe）完登、キャンパスボード考案者
 links:
   wikipedia: https://en.wikipedia.org/wiki/Wolfgang_G%C3%BCllich
 ascents:
@@ -22,5 +22,5 @@ competitions: []
 ---
 
 ドイツのスポーツクライマー。世界初の 9a「Action Directe」を完登し、
-カンパスボード等のトレーニング革命を象徴する存在。
+キャンパスボード等のトレーニング革命を象徴する存在。
 Action Directe 完登の翌年、1992年に交通事故により31歳で死去。

@@ -9,14 +9,6 @@ title: 2026-06-04 週
 - 栄養サプリのページを追加（[プロテイン](/training/nutrition/protein/)・[BCAA](/training/nutrition/bcaa/)・[EAA](/training/nutrition/eaa/)・[コンドロイチン](/training/nutrition/chondroitin/)・[グルコサミン](/training/nutrition/glucosamine/)・[MSM](/training/nutrition/msm/)）
 - [用語集](/glossary/)に新語追加（デッド・プッシュ・手に足・ダイアゴナル・手汗・サーキットトレーニング・保持力・握力・神経系）
 
-## わかったこと・気づき
--
-
-## 次にやること
--
-
-## 問い・相談したいこと
--
 
 ## 先生からのアドバイス
 - 「親しい・気軽」の分類を人に聞いてみる、ワークショップで聞いてみると面白いかも

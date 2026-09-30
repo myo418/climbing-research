@@ -439,6 +439,19 @@ export const channels: YoutubeChannel[] = [
     iconUrl: 'https://yt3.googleusercontent.com/ytc/AIdro_nJc_7YYluNa1bC09bEYod-l8qUF6ML9tOvgm5xbSPnwQ=s900-c-k-c0x00ffffff-no-rj',
     bannerUrl: 'https://yt3.googleusercontent.com/VDcmB5A2a-6A4qu7mZhqiWwdRinhf8zASNk6GqTIsOJWd9u104eBi2FoRSJGfaGAxNRMEzxs3Q=w1138-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj',
   },
+  // ── 日本語 / 医療・安全 ───────────────────────────────
+  {
+    slug: 'yamagaku-dr-take',
+    name: '【山岳医】たけちゃんねる【救急医】',
+    url: 'https://www.youtube.com/@山岳医たけちゃんねる救急医',
+    language: 'ja',
+    type: 'individual',
+    subscribers: '約2,660人',
+    description: '国際山岳医・救急科専門医による登山・クライミング医療情報チャンネル。怪我の予防・応急処置・医科学の知見を医師の立場から解説。JMSCA SC医科学委員会委員長も務める。',
+    featuredVideoId: 'i6DJGqufPqY',
+    featuredVideoTitle: '【自業自得！？】クラックの挟まれ事故【岩破壊！】',
+    iconUrl: 'https://yt3.googleusercontent.com/_jHFqkXhsnz4KxLxGPYVK7jmtJfuKUhLbu27UppmMtFFm56XOJCMC2fuAlkuXERSDiP0WkMUKg=s900-c-k-c0x00ffffff-no-rj',
+  },
   // ── 英語 / 競技団体 ────────────────────────────────────
   {
     slug: 'ifsc',

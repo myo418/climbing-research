@@ -1,5 +1,7 @@
 ---
 title: 書籍
+image_height: 320
+image_side: true
 ---
 
 # 書籍
