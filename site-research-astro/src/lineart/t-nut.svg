@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" data-term="t-nut"
+     fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round">
+  <title>爪付きナット</title>
+  <desc>壁の断面。裏から差し込んだ爪付きナットに、表からホールドごとボルトを締め込む。</desc>
+
+  <!-- 合板の壁（断面。左が裏、右が表） -->
+  <path d="M 60 24 L 60 68" stroke-width="1.6"/>
+  <path d="M 60 172 L 60 216" stroke-width="1.6"/>
+  <path d="M 96 24 L 96 44" stroke-width="1.6"/>
+  <path d="M 96 200 L 96 216" stroke-width="1.6"/>
+  <path d="M 60 24 L 96 24" stroke-width="1.6"/>
+  <path d="M 60 216 L 96 216" stroke-width="1.6"/>
+
+  <!-- 合板の層（断面に出る単板の重なり） -->
+  <path d="M 69 24 L 69 64" stroke-width="0.6"/>
+  <path d="M 78 24 L 78 64" stroke-width="0.6"/>
+  <path d="M 87 24 L 87 64" stroke-width="0.6"/>
+  <path d="M 69 176 L 69 216" stroke-width="0.6"/>
+  <path d="M 78 176 L 78 216" stroke-width="0.6"/>
+  <path d="M 87 176 L 87 216" stroke-width="0.6"/>
+
+  <!-- 爪付きナット：つば（壁の裏面に密着する円板） -->
+  <path d="M 60 68 L 44 68 L 44 172 L 60 172" stroke-width="1.6"/>
+
+  <!-- 爪付きナット：筒の外側（壁の穴を貫いて表面まで届く） -->
+  <path d="M 60 96 L 96 96" stroke-width="1"/>
+  <path d="M 60 144 L 96 144" stroke-width="1"/>
+
+  <!-- 筒の内側のねじ山（ここでボルトが噛む） -->
+  <path d="M 68 101 L 68 107" stroke-width="0.6"/>
+  <path d="M 76 101 L 76 107" stroke-width="0.6"/>
+  <path d="M 84 101 L 84 107" stroke-width="0.6"/>
+  <path d="M 92 101 L 92 107" stroke-width="0.6"/>
+  <path d="M 68 133 L 68 139" stroke-width="0.6"/>
+  <path d="M 76 133 L 76 139" stroke-width="0.6"/>
+  <path d="M 84 133 L 84 139" stroke-width="0.6"/>
+  <path d="M 92 133 L 92 139" stroke-width="0.6"/>
+
+  <!-- 爪：つばの縁から折れ曲がり、木に食い込んで回り止めになる -->
+  <path d="M 60 70 L 88 77 L 60 84" stroke="#6b1a14" stroke-width="1"/>
+  <path d="M 60 170 L 88 163 L 60 156" stroke="#6b1a14" stroke-width="1"/>
+
+  <!-- ホールド（壁の表面に載る。ボルトの頭が当たる面は平ら） -->
+  <path d="M 96 44 L 150 40 L 174 74 L 178 94" stroke-width="1.6"/>
+  <path d="M 178 146 L 174 172 L 142 198 L 100 200 L 96 188" stroke-width="1.6"/>
+  <path d="M 178 94 L 178 104" stroke-width="1.6"/>
+  <path d="M 178 136 L 178 146" stroke-width="1.6"/>
+
+  <!-- ホールドと壁が当たっている面 -->
+  <path d="M 96 44 L 96 96" stroke-width="1"/>
+  <path d="M 96 144 L 96 188" stroke-width="1"/>
+
+  <!-- ボルト：軸（ホールドを貫き、筒のねじに入る） -->
+  <path d="M 64 104 L 178 104" stroke-width="1.6"/>
+  <path d="M 64 136 L 178 136" stroke-width="1.6"/>
+  <path d="M 64 104 L 64 136" stroke-width="1"/>
+
+  <!-- ボルト：頭（ホールドを壁に押し付ける） -->
+  <path d="M 178 94 L 208 94 L 208 146 L 178 146" stroke-width="1.6"/>
+
+  <!-- 頭に開いた六角穴（外からは見えない） -->
+  <path d="M 208 108 L 192 108 L 192 132 L 208 132" stroke-width="0.6" stroke-dasharray="4 3"/>
+</svg>

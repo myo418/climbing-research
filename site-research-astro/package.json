@@ -5,9 +5,12 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node scripts/lineart.mjs build",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "admin": "node --watch-path=./scripts --watch-path=./src/data scripts/admin.mjs",
+    "lineart": "node scripts/lineart.mjs",
     "move-visualizer": "node scripts/move-visualizer.mjs"
   },
   "dependencies": {

@@ -1,7 +1,15 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import { terms, GLOSSARY_TAGS } from '../../../data/glossary';
+import { lineart } from '../../../data/lineart';
 import { url } from '../../../lib/url';
+
+// サムネは写真を優先し、無ければその用語の線画を出す
+const artByTerm = new Map(lineart.filter((a) => a.term).map((a) => [a.term as string, a]));
+const thumbOf = (slug: string, image?: string) =>
+  image ? { src: url(image), kind: 'photo' as const }
+        : artByTerm.has(slug) ? { src: url(artByTerm.get(slug)!.src), kind: 'lineart' as const }
+        : null;
 
 const sorted = [...terms].sort((a, b) => a.term.localeCompare(b.term, 'ja'));
 const tagCounts = new Map<string, number>();
@@ -53,11 +61,12 @@ for (const t of terms) if (t.prominence) prominenceCounts.set(t.prominence, (pro
         data-prominence={t.prominence ?? ''}
       >
         <a href={url(`/basics/glossary/${t.slug}/`)} class="term-thumb" aria-hidden="true" tabindex="-1">
-          {t.image ? (
-            <img src={url(t.image)} alt="" loading="lazy" />
-          ) : (
-            <span class="term-thumb-empty" />
-          )}
+          {(() => {
+            const th = thumbOf(t.slug, t.image);
+            return th
+              ? <img src={th.src} alt="" loading="lazy" class={th.kind === 'lineart' ? 'is-lineart' : undefined} />
+              : <span class="term-thumb-empty" />;
+          })()}
         </a>
         <div class="term-body">
           <a href={url(`/basics/glossary/${t.slug}/`)} class="term-link">
@@ -124,6 +133,8 @@ for (const t of terms) if (t.prominence) prominenceCounts.set(t.prominence, (pro
 
   function pushState() {
     const params = new URLSearchParams();
+    const q = searchInput.value.trim();
+    if (q) params.set('q', q);
     if (activeTag) params.set('tag', activeTag);
     if (activeProminence) params.set('prominence', activeProminence);
     const qs = params.toString();
@@ -140,9 +151,13 @@ for (const t of terms) if (t.prominence) prominenceCounts.set(t.prominence, (pro
     emptyEl.hidden = visible > 0;
   }
 
+  let urlTimer: number | undefined;
   searchInput.addEventListener('input', () => {
     keyword = normalize(searchInput.value.trim());
     apply();
+    // 1文字ごとに書き換えると重いので少し待ってからURLに反映する
+    clearTimeout(urlTimer);
+    urlTimer = window.setTimeout(pushState, 250);
   });
 
   chipsContainer.addEventListener('click', (e) => {
@@ -170,6 +185,12 @@ for (const t of terms) if (t.prominence) prominenceCounts.set(t.prominence, (pro
   const params = new URLSearchParams(location.search);
   const initialTag = params.get('tag') ?? '';
   const initialProminence = params.get('prominence') ?? '';
+  const initialQuery = params.get('q') ?? '';
+
+  if (initialQuery) {
+    searchInput.value = initialQuery;
+    keyword = normalize(initialQuery);
+  }
 
   if (initialTag) {
     const target = chipsContainer.querySelector<HTMLButtonElement>(
@@ -193,7 +214,7 @@ for (const t of terms) if (t.prominence) prominenceCounts.set(t.prominence, (pro
     }
   }
 
-  if (initialTag || initialProminence) apply();
+  if (initialQuery || initialTag || initialProminence) apply();
 </script>
 
 <style>
@@ -272,9 +293,11 @@ for (const t of terms) if (t.prominence) prominenceCounts.set(t.prominence, (pro
   }
   .term-thumb {
     flex: 0 0 auto;
-    width: 64px;
-    height: 64px;
-    display: block;
+    width: 96px;
+    height: 96px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
     background: var(--sidebar-bg);
     border: 1px solid var(--border);
@@ -284,6 +307,13 @@ for (const t of terms) if (t.prominence) prominenceCounts.set(t.prominence, (pro
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+  /* 線画は切り取らず全体を入れる。padding が枠からはみ出さないよう border-box にする */
+  .term-thumb img.is-lineart {
+    object-fit: contain;
+    box-sizing: border-box;
+    padding: 4px;
+    background: #fff;
   }
   .term-thumb-empty {
     display: block;

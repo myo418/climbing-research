@@ -1,0 +1,26 @@
+# speed-climbing
+checked: 2026-09-22
+title: スピードクライミング
+desc: 決まった15mのルートをどれだけ速く登れるかを競う。
+term: speed-climbing
+model: gemini-2.5-flash-image (2:3)
+date: 2026-09-22
+refs: photo-speed-wall.jpg
+
+--- 描くもの（ここを書き換えて描き直す）---
+A competition speed climbing wall, using the attached photograph as the reference for the composition: the whole
+free-standing wall seen from the front at a distance, tall and narrow, with its top structure and side panels, and
+the ground at its base inside the frame.
+Copy the layout from the photograph: two identical lanes side by side separated by a vertical line, each lane
+carrying the standardised route of large hand holds in the fixed zig-zag with small round foot holds between them,
+the panel seams and the grid of small mounting holes, and the auto-belay ropes running down from the top of the
+wall.
+Two climbers are racing, one on each lane, both partway up and caught mid-move with one arm reaching high, and at
+the foot of the wall two judges stand looking up.
+Every hand hold is the same standard shape: from a central mounting bolt four forms stick out — a ball-like lump,
+a rounded hill, a long pointed tail opposite the ball and a shorter tail — with cut hollows between them.
+Redraw everything as clean outlines: no colour, no tone, no photographic shading, no advertising text or logos.
+No faces.
+
+--- スタイル（lineart-style.mjs の IMAGE_STYLE。手で直さない）---
+Black and white line-art illustration for an instructional diagram. Clean, precise, confident outlines of near-uniform thin weight on a plain white background. No shading, no hatching, no cross-hatching, no stippling, no grey tones, no gradients, no fills, no color. Never fill any shape with solid black: mats, bags, shoes, clothing and equipment are outlines only. Every shape is empty inside, like a coloring book page waiting to be coloured: no silhouettes, no black masses, no filled panels. No text, no labels, no arrows, no watermark, no frame, no background scenery. Anatomically accurate proportions and realistic form: hands, fingers, limbs and equipment must be correct in shape and proportion. But keep the linework simple: draw only the outlines and the few lines that actually define the form (a joint, an edge, the thickness of a material, a contact point). Do NOT draw skin creases, wrinkles, muscle striations, fabric folds, hair strands or rock surface texture. Rock must read as real rock: an irregular angular mass built from flat facets that meet along hard, slightly broken edges, with a few long cracks and fractures running through the mass, small chipped notches breaking the silhouette, and corners that are never perfectly straight. Never a smooth rounded blob, never a clean rectangular block like sawn timber, never a wall made only of wavy vertical lines. Build the rock from its facet edges and cracks alone — no stippling, no scratching, no hatching, no speckles for texture. A rock wall behind the subject is drawn the same way: a few long facet edges meeting at angles plus one or two cracks, leaving most of the wall blank — not a curtain of long wavy vertical lines. Man-made equipment is the exception and is drawn as accurate mechanical structure: carabiners, bolts, hangers, belay devices, cams, harnesses, shoes and machines keep every part, edge, material thickness, seam, rivet and moving joint in its correct place — drawn with clean straight lines, true circles and even line weight, like a parts diagram. Simplify the human body, never the hardware. Japanese vector technical illustration style, like an instruction manual or a coloring-book outline. When an arm, a leg or any other part of the body leaves the picture, it must run off the edge of the frame and be cut by the frame itself. Never draw a limb that stops inside the picture with a blunt cut end: a severed-looking arm or leg is wrong. Finally and most importantly: every face in the picture is completely blank. Draw the head, the hair and the ear, but no eyes, no eyebrows, no nose, no mouth, no chin line, no expression of any kind. A face with features is wrong and must not appear.

@@ -1,6 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import { terms } from '../../../data/glossary';
+import { lineart } from '../../../data/lineart';
 import { url } from '../../../lib/url';
 
 export function getStaticPaths() {
@@ -11,6 +12,8 @@ export function getStaticPaths() {
 }
 
 const { term } = Astro.props;
+// この用語に紐づいた線画。1語に複数枚あってよい（例: エイドの全身図と道具の寄り）
+const arts = lineart.filter((a) => a.term === term.slug);
 const related = terms
   .filter((t) => t.slug !== term.slug && t.tags.some((tag) => term.tags.includes(tag)))
   .slice(0, 8);
@@ -32,6 +35,12 @@ const related = terms
       <a href={url(`/basics/glossary/?tag=${encodeURIComponent(tag)}`)} class="tag">{tag}</a>
     ))}
   </div>
+  {arts.map((art) => (
+    <figure class="lineart">
+      <img src={url(art.src)} alt={art.title} width={art.width} height={art.height} />
+      <figcaption>{art.desc}</figcaption>
+    </figure>
+  ))}
   {term.image && (
     <figure class="figure">
       <img src={url(term.image)} alt={term.term} />
@@ -117,6 +126,21 @@ const related = terms
   .tag:hover {
     color: var(--fg);
     background: var(--border);
+  }
+  .lineart {
+    margin: 16px 0 24px;
+    max-width: 300px;
+  }
+  .lineart img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .lineart figcaption {
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--muted);
+    margin-top: 8px;
   }
   .figure {
     margin: 16px 0 24px;
