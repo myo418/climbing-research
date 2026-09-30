@@ -1,0 +1,227 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { moveClips, moveGrids, moveVideos } from '../../../data/move-visualizer';
+import { url } from '../../../lib/url';
+
+const grid = moveGrids.find((g) => g.id === 'grid_4x4');
+const gridSilhouette = moveGrids.find((g) => g.id === 'grid_4x4_silhouette');
+const hasSilhouette = moveClips.some((c) => c.silhouette);
+const seconds = Math.round(moveVideos.filter((v) => v.kind === 'pointlight').reduce((n, v) => n + v.duration, 0));
+---
+
+<Layout title="動きの可視化">
+  <h1>動きの可視化</h1>
+  <p class="meta">{moveClips.length} クリップ / 計 {Math.floor(seconds / 60)}分{seconds % 60}秒</p>
+
+  <p>
+    登っている映像から関節の位置だけを取り出して、黒地に白い点で描き直した。
+    壁の色もホールドの形も服装も表情も落としてあるのに、点の集まりが人の動きにしか見えない。
+  </p>
+  <p>
+    関節に光点をつけた人を暗闇で撮ると、点だけで歩行や動作が読み取れる。
+    ヨハンソンが1973年に示したバイオロジカルモーションと呼ばれる現象で、
+    点の動きだけから性別や持っている物の重さ、感情まで判別できることが分かっている。
+    映像の手本にしたのは三宅一生「A-POC INSIDE」（2007年 パリコレクション、演出: 佐藤雅彦＋EUPHRATES）。
+  </p>
+  <p>
+    クライミングにこれを当てると、腕や脚の形が見えなくなる代わりに、
+    どこで止まってどこで一気に動いたかという時間の配分が前に出てくる。
+    同じ課題でも、静かに乗り込む人と振り込んで止める人では点の流れ方がまるで違う。
+  </p>
+
+  {[grid, gridSilhouette].filter(Boolean).map((g) => (
+    <section class="mv-hero">
+      <video
+        src={url(g!.src)}
+        poster={url(g!.poster)}
+        width={g!.width}
+        height={g!.height}
+        controls
+        loop
+        muted
+        playsinline
+        preload="none"
+      ></video>
+      <p class="mv-cap">
+        16本を並べたもの{g!.id.endsWith('_silhouette') ? '（シルエット）' : '（ポイントライト）'}。
+        <button type="button" class="mv-full">全画面</button>
+      </p>
+    </section>
+  ))}
+
+  {hasSilhouette && (
+    <div class="mv-switch" role="group" aria-label="表示の切り替え">
+      <button type="button" data-kind="pointlight" class="is-on" aria-pressed="true">ポイントライト</button>
+      <button type="button" data-kind="silhouette" aria-pressed="false">シルエット</button>
+    </div>
+  )}
+
+  <div class="mv-grid">
+    {moveClips.map((clip) => (
+      <figure class="mv-card">
+        {(['pointlight', 'silhouette'] as const).map((kind) => {
+          const v = clip[kind];
+          return v ? (
+            <video
+              class="mv-video"
+              data-kind={kind}
+              hidden={kind === 'silhouette'}
+              src={url(v.src)}
+              poster={url(v.poster)}
+              width={v.width}
+              height={v.height}
+              controls
+              loop
+              muted
+              playsinline
+              preload="none"
+            ></video>
+          ) : null;
+        })}
+        <figcaption>
+          <strong>{clip.id}</strong>
+          <span class="mv-sec">{clip.duration.toFixed(0)}秒</span>
+          <button type="button" class="mv-full">全画面</button>
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+</Layout>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.mv-switch button');
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const kind = btn.dataset.kind;
+      buttons.forEach((b) => {
+        const on = b === btn;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      document.querySelectorAll<HTMLVideoElement>('.mv-video').forEach((v) => {
+        const show = v.dataset.kind === kind;
+        // 隠れた側が鳴り続けないよう止めてから切り替える
+        if (!show && !v.paused) v.pause();
+        v.hidden = !show;
+      });
+    });
+  });
+
+  // カードが狭いとブラウザが操作バーから全画面ボタンを省くので、自前で用意する。
+  // iOS Safari だけ要素共通の API を持たず、video 専用のものしかない
+  function enterFullscreen(video: HTMLVideoElement | null) {
+    if (!video) return;
+    // preload="none" のまま呼ぶと iOS が全画面に入れないので、先に読ませる
+    if (video.readyState === 0) video.load();
+    const el = video as HTMLVideoElement & {
+      webkitRequestFullscreen?: () => void;
+      webkitEnterFullscreen?: () => void;
+    };
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.webkitEnterFullscreen) el.webkitEnterFullscreen();
+  }
+
+  /** そのボタンが受け持つ動画。一覧のカードでは今表示されている方を返す */
+  function videoFor(btn: HTMLElement): HTMLVideoElement | null {
+    const scope = btn.closest('.mv-card') ?? btn.closest('.mv-hero');
+    if (!scope) return null;
+    const shown = [...scope.querySelectorAll<HTMLVideoElement>('video')].find((v) => !v.hidden);
+    return shown ?? scope.querySelector('video');
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('.mv-full').forEach((btn) => {
+    btn.addEventListener('click', () => enterFullscreen(videoFor(btn)));
+  });
+</script>
+
+<style>
+  .mv-hero {
+    margin: 32px 0 8px;
+  }
+  .mv-hero video {
+    width: 100%;
+    height: auto;
+    background: #000;
+    display: block;
+  }
+  .mv-cap {
+    font-size: 12px;
+    color: #666;
+    margin: 8px 0 0;
+  }
+  .mv-switch {
+    display: flex;
+    gap: 0;
+    margin: 32px 0 0;
+  }
+  .mv-switch button {
+    font: inherit;
+    font-size: 13px;
+    padding: 6px 14px;
+    border: 1px solid #ddd;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+  }
+  .mv-switch button + button {
+    border-left: 0;
+  }
+  .mv-switch button.is-on {
+    background: #222;
+    border-color: #222;
+    color: #fff;
+  }
+  .mv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 32px 20px;
+    margin-top: 24px;
+  }
+  .mv-card {
+    margin: 0;
+  }
+  .mv-card video {
+    width: 100%;
+    /* 縦12本・横4本が混ざっている。置き場の縦横比をそろえ、映像はその中に収める。
+       地色が黒なので、余る側に出る帯は継ぎ目なく見える */
+    aspect-ratio: 3 / 4;
+    height: auto;
+    object-fit: contain;
+    background: #000;
+    display: block;
+  }
+  /* display の指定がブラウザ標準の [hidden] を上書きしてしまうので、打ち消す。
+     これが無いとポイントライトとシルエットが両方出る */
+  .mv-card video[hidden] {
+    display: none;
+  }
+  .mv-card figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 6px;
+    font-size: 12px;
+  }
+  .mv-sec {
+    color: #999;
+    margin-left: auto;
+  }
+  .mv-full {
+    font: inherit;
+    font-size: 11px;
+    padding: 2px 8px;
+    border: 1px solid #ddd;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+  }
+  .mv-full:hover {
+    border-color: #222;
+    color: #222;
+  }
+  .mv-cap .mv-full {
+    margin: 0 8px 0 4px;
+  }
+</style>

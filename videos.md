@@ -13,25 +13,36 @@ YouTube / Vimeo / ローカルの**3方式すべてに対応**。動画ごとに
 
 | ホスト | 向いている用途 | 料金 | UI・見た目 |
 |---|---|---|---|
+| **Cloudflare R2** | 顔が写らない素材。ムーブ実演、可視化、アンビエント | 10GBまで無料 | UIなし。素の `<video>` で読める |
+| **Cloudflare Stream** | **顔が写るもの**。署名URLとドメイン制限がかけられる | Starter 1,000分枠（契約済） | iframeかhls.jsが要る |
 | **Vimeo** | 中核コンテンツ、インタビュー、ポートフォリオ的な見せ所 | Free 2GB / Starter $12/月 60GB | 広告なし・関連動画なし・ロゴ最小、静か |
 | **YouTube（限定公開）** | 長尺の記録、参考資料、本数が多い補助コンテンツ | 無料・無制限 | 標準UIあり（関連動画やボタン） |
-| **Vercel直置き** | 5〜10秒のループ（ムーブ実演、アンビエント） | 無料 | UIなし、`<video autoplay loop muted>`で静かに流れる |
 
 ### 選び分けの原則
 
+- **顔が写らない素材** → R2。素の `<video>` で読めるのでページの作りを縛らない
+- **顔が写るもの** → Stream。署名URLとドメイン制限で見られる範囲を絞る。
+  ただしこれは露出を狭めるだけで、**許諾やぼかしの代わりにはならない**
 - **「このページの顔」になる動画** → Vimeo
 - **記録として置いておくだけ** → YouTube 限定公開
-- **静かに背景で流したい短尺** → Vercel直置き（mp4）
 - **既存の参考作品（Free Solo等）** → リンクのみ（再アップせず出典として紹介）
+
+### R2とStreamの使い分けが「顔」で決まる理由
+
+R2は公開バケット（r2.dev）なので、**URLを知っていれば誰でも落とせる**。
+Streamは `requireSignedURLs` と `allowedOrigins` で埋め込み先を絞れる。
+一方でStreamはHLS配信なので、ChromeやFirefoxでは素の `<video>` では再生できず、
+iframe埋め込みかhls.jsが要る。**保護が要らないものにStreamを使うと構造だけ重くなる。**
 
 ### プライバシー設定の推奨
 - **Vimeo**: Hide from Vimeo.com / 埋め込みドメイン制限（Standard以上）
 - **YouTube**: 限定公開（unlisted）をデフォルト。広く見せたい物だけ公開
 
 ### ホストコード（表で使う略号）
+- `r2` — Cloudflare R2（バケット `climbing-research`）
+- `stream` — Cloudflare Stream
 - `vimeo` — Vimeo
 - `yt` — YouTube
-- `local` — Vercel直置き（`site/public/videos/`）
 - `link` — 外部動画へのリンクのみ
 
 ---
@@ -53,6 +64,44 @@ YouTube / Vimeo / ローカルの**3方式すべてに対応**。動画ごとに
 | # | 元ID (GPhotos) | 内容 | 長さ | ホスト | 公開ID / パス | 公開設定 | 状態 | 使用ページ |
 |---|---|---|---|---|---|---|---|---|
 | 1 |  |  |  |  |  |  | 未処理 |  |
+
+## 動きの可視化（move-visualizer）
+
+登っている映像から関節座標を取り出し、点や影として描き直したもの。
+制作は別リポジトリ `~/git/move-visualizer`、掲載先は [/design/move-visualizer/](site-research-astro/src/pages/design/move-visualizer/index.astro)。
+
+| 種別 | 本数 | ホスト | 公開ID / パス | 状態 |
+|---|---|---|---|---|
+| ポイントライト（黒地に白点） | 16 | `r2` | `move-visualizer/pointlight/C05xx.mp4` | 埋め込み済 |
+| シルエット | 16 | `r2` | `move-visualizer/silhouette/C05xx.mp4` | 埋め込み済 |
+| 16本並べた一覧（点・影 各1） | 2 | `r2` | `move-visualizer/grid/grid_4x4*.mp4` | 埋め込み済 |
+| 元映像を並べたもの（`grid_original_*`） | 4 | — | — | 保留 |
+
+元動画（計147MB）も、H.264に変換した25MBぶんも**リポジトリに入れない**。
+変換したものはR2に上げ、コミットするのは一覧（`src/data/move-visualizer.json`）だけ。
+変換とアップロードは `cd site-research-astro && npm run move-visualizer`。
+
+公開URLの先頭は `https://pub-461fd1bfecdb44ea8e0f3d71c8e0bcc1.r2.dev/`。
+
+**`grid_original_*` は保留**。可視化を通していない元映像で、ジムに居合わせた人の顔が写るコマがある。
+載せるなら本人の許諾を取ってから。変換スクリプトの `EXCLUDE` で弾いている。
+**R2は公開バケットなので、出すことになってもR2ではなくStreamに置く。**
+
+### 元動画の置き場
+
+元動画は Google Drive にある。
+
+```
+~/Library/CloudStorage/GoogleDrive-<アカウント>/マイドライブ/
+  武蔵野美術大学/卒業制作/move-visualizer/original/
+```
+
+131本（C0598〜C0738）で計39.2GB。可視化に使ったのはそのうち16本（C0598〜C0613、3.3GB）。
+
+**ストリーミング状態なので実体はまだ手元に無い**（`ls` はサイズを出すが `du` は 0B）。
+使うときは Finder で「オフラインで使用可能にする」を選んで降ろす。
+`~/git/move-visualizer/` 側の `original/` は処理後に消してあり、残っているのは
+`clipped/C0612.mp4`（1本だけ切り出したもの）と `output/grid_original_*`（4本）。
 
 ## 参考動画（外部作品 / 引用）
 
@@ -86,11 +135,12 @@ YouTube / Vimeo / ローカルの**3方式すべてに対応**。動画ごとに
 2. 元ID・タイトル・長さ・ホスト予定をこの表に追加（`状態: 未処理`）
 3. ダウンロード → 必要なら編集（トリミング・画質調整）
 4. ホストにアップロード:
+   - 顔が写る → Stream（署名URL・ドメイン制限つき）
+   - 顔が写らない短尺・ループ → R2
    - 中核的・見せたい → Vimeo
    - 記録・参考 → YouTube 限定公開
-   - 短尺ループ → `site/public/videos/`
 5. 公開ID / パスをこの表に追記、状態を`アップ済`に
-6. MDXから `<VideoEmbed host="vimeo|yt|local" id="..." caption="..." />` で呼び出す
+6. MDXから `<VideoEmbed host="r2|stream|vimeo|yt" id="..." caption="..." />` で呼び出す
 7. 使用ページを記入、状態を`埋め込み済`に
 
 ---
@@ -110,5 +160,6 @@ YouTube / Vimeo / ローカルの**3方式すべてに対応**。動画ごとに
 |---|---|---|
 | `vimeo` | `987654321` | Vimeo URL末尾の数字（`vimeo.com/987654321`） |
 | `yt` | `dQw4w9WgXcQ` | URLの `v=` 以降 11文字 |
-| `local` | `/videos/heelhook-01.mp4` | Vercelにアップしたパス |
+| `r2` | `move-visualizer/pointlight/C0598.mp4` | バケット内のキー。頭に公開URLを付けて使う |
+| `stream` | `6d3ec384390a057eee30be5bddb56a16` | Streamの動画UID |
 | `link` | URLそのまま | 外部動画のフルURL |
