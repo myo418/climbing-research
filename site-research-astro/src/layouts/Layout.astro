@@ -4,9 +4,17 @@ import { SITE_NAME } from '../lib/config';
 
 interface Props {
   title: string;
+  /** 本文をビューポートいっぱいに広げ、ページ自体はスクロールさせない */
+  fullscreen?: boolean;
+  /** 本文の幅を読み物向けに狭める（動画や図をその幅いっぱいに置くページ用） */
+  narrow?: boolean;
+  /** 本文中の画像の高さを一律に揃える（px）。書影のように縦横比がまちまちなものを並べるページ用 */
+  imageHeight?: number;
+  /** 画像を左に置き、続く説明をその右に回り込ませる（imageHeight と併用する） */
+  imageSide?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, fullscreen = false, narrow = false, imageHeight, imageSide = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -16,10 +24,21 @@ const { title } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <title>{title} | {SITE_NAME}</title>
+    <!-- ページ固有の <head> 追記（webフォントなど）。使わないページは何も出ない -->
+    <slot name="head" />
   </head>
   <body>
-    <div class="app">
-      <aside class="sidebar">
+    <div
+      class:list={[
+        'app',
+        { fullscreen, narrow, 'fixed-image-height': imageHeight != null, 'side-image': imageSide },
+      ]}
+      style={imageHeight != null ? `--image-height: ${imageHeight}px` : undefined}
+    >
+      <button id="nav-toggle" type="button" aria-expanded="true" aria-controls="sidebar" title="サイドメニューの開閉（\\）">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </button>
+      <aside class="sidebar" id="sidebar">
         <Sidebar />
       </aside>
       <main class="main">
@@ -35,6 +54,31 @@ const { title } = Astro.props;
 </html>
 
 <script>
+  // サイドメニューの開閉。状態は端末ごとの好みなので localStorage に持つ
+  {
+    const app = document.querySelector('.app') as HTMLElement;
+    const toggle = document.getElementById('nav-toggle') as HTMLButtonElement;
+    const KEY = 'nav-closed';
+    const apply = (closed: boolean) => {
+      app.classList.toggle('nav-closed', closed);
+      toggle.setAttribute('aria-expanded', String(!closed));
+    };
+    let closed = false;
+    try { closed = localStorage.getItem(KEY) === '1'; } catch (e) { /* 使えない環境では開いたまま */ }
+    apply(closed);
+    const set = (next: boolean) => {
+      closed = next;
+      apply(closed);
+      try { localStorage.setItem(KEY, closed ? '1' : '0'); } catch (e) { /* 保存できなくても動く */ }
+    };
+    toggle.addEventListener('click', () => set(!closed));
+    document.addEventListener('keydown', (e) => {
+      const el = document.activeElement as HTMLElement | null;
+      if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+      if (e.key === '\\') { set(!closed); e.preventDefault(); }
+    });
+  }
+
   const dialog = document.getElementById('img-dialog') as HTMLDialogElement;
   const dialogImg = document.getElementById('img-dialog-img') as HTMLImageElement;
 
@@ -99,8 +143,110 @@ const { title } = Astro.props;
     min-width: 0;
   }
 
+  /* 全画面のページ。本文が画面の高さぴったりに収まり、ページはスクロールしない */
+  .app.fullscreen {
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .app.fullscreen .main {
+    padding: 0;
+    height: 100dvh;
+    overflow: hidden;
+  }
+  .app.fullscreen .prose {
+    max-width: none;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* サイドメニューの開閉。閉じると本文が全幅になる */
+  .app.nav-closed {
+    grid-template-columns: 1fr;   /* sidebar を消すので本文だけの1列にする */
+  }
+  .app.nav-closed .sidebar {
+    display: none;
+  }
+  #nav-toggle {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 20;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 7px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.15s;
+  }
+  #nav-toggle:hover,
+  #nav-toggle:focus-visible {
+    opacity: 1;
+  }
+  #nav-toggle .bar {
+    display: block;
+    height: 1px;
+    background: var(--fg);
+  }
+  .app.nav-closed #nav-toggle {
+    background: var(--bg);
+  }
+
   .prose {
-    max-width: 708px;
+    max-width: 960px;
+  }
+  .app.narrow .prose {
+    max-width: 720px;
+  }
+
+  /* 縦横比がまちまちな画像を、高さだけ揃えて並べる */
+  .app.fixed-image-height .prose img {
+    height: var(--image-height);
+    width: auto;
+    margin: 16px 0;
+  }
+
+  /* 画像を左に、説明をその右に。画像の幅はまちまちなので、置き場の幅の方を固定して
+     説明の左端が全項目でそろうようにする */
+  .app.side-image .prose {
+    display: flow-root;
+  }
+  .app.side-image .prose p:has(img) {
+    float: left;
+    width: calc(var(--image-height, 260px) * 0.78);
+    margin: 16px 28px 32px 0;
+  }
+  .app.side-image .prose p:has(img) img {
+    margin: 0;
+  }
+  /* 回り込む側は独立したブロックにして、行が画像に食い込まないようにする */
+  .app.side-image .prose ul,
+  .app.side-image .prose ol,
+  .app.side-image .prose table,
+  .app.side-image .prose p:not(:has(img)) {
+    overflow: hidden;
+  }
+  .app.side-image .prose h1,
+  .app.side-image .prose h2,
+  .app.side-image .prose h3,
+  .app.side-image .prose h4,
+  .app.side-image .prose hr {
+    clear: both;
+  }
+  /* 画面が狭いときは横並びをやめて元の縦積みに戻す */
+  @media (max-width: 700px) {
+    .app.side-image .prose p:has(img) {
+      float: none;
+      width: auto;
+      margin: 16px 0;
+    }
   }
 
   .prose a {
@@ -167,12 +313,57 @@ const { title } = Astro.props;
     border-left: 3px solid var(--border);
     color: var(--muted);
   }
+  /* Visually hidden: the GFM footnote plugin emits an English "Footnotes"
+     heading with this class. Pages write their own 出典 heading above it. */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .prose .footnotes {
+    margin-top: 24px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .prose .footnotes ol {
+    padding-left: 20px;
+  }
+  .prose .footnotes li {
+    margin: 6px 0;
+  }
+  .prose .footnotes li p {
+    margin: 0;
+  }
+  .prose sup a[data-footnote-ref] {
+    padding: 0 1px;
+    font-size: 11px;
+    text-decoration: none;
+  }
+  .prose a[data-footnote-backref] {
+    text-decoration: none;
+  }
+
   .prose img {
     max-width: 100%;
     height: auto;
     display: block;
     margin: 16px auto;
     border: 1px solid var(--border);
+  }
+  .prose .figcaption {
+    margin: -8px 0 20px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--muted);
+    text-align: center;
   }
   .prose .image-row {
     display: grid;
@@ -201,11 +392,81 @@ const { title } = Astro.props;
       height: auto;
     }
   }
+  /*
+   * 本文の横に回り込ませる補足画像。
+   *   <div class="fig-right"> … </div>   本文の右に置く（左に文字が回り込む）
+   *   <div class="fig-left">  … </div>   本文の左に置く
+   * キャプション（<p class="caption">）は div の中に入れる。
+   * 幅は本文より小さく取る。補足なので、読む邪魔をしない大きさに収める。
+   */
+  .prose .fig-right,
+  .prose .fig-left {
+    width: clamp(160px, 36%, 300px);
+    margin: 6px 0 12px;
+  }
+  .prose .fig-right { float: right; margin-left: 28px; }
+  .prose .fig-left  { float: left;  margin-right: 28px; }
+  .prose .fig-right img,
+  .prose .fig-left img {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0;
+  }
+  .prose .fig-right p,
+  .prose .fig-left p {
+    margin: 6px 0 0;
+  }
+  /* 節の切れ目で回り込みを解除する。見出しが画像の横に食い込まないように */
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose hr {
+    clear: both;
+  }
+  /* 画面が狭いときは回り込みをやめて、本文の流れの中に置く */
+  @media (max-width: 700px) {
+    .prose .fig-right,
+    .prose .fig-left {
+      float: none;
+      width: min(70%, 320px);
+      margin: 16px auto;
+    }
+  }
+
   .prose .image-half {
     margin: 16px 0;
   }
   .prose .image-half img {
     max-width: 50%;
+  }
+  /* Figmaから書き出した横長の図版。縮めると文字が潰れるので原寸で置き、横スクロールさせる */
+  .prose .fig-wide {
+    margin: 24px 0 14px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  .prose .fig-wide img {
+    display: block;
+    width: 100%;
+    /* これ以下に縮むと注記の文字が潰れるので、狭い画面ではここで横スクロールに切り替わる */
+    min-width: 660px;
+    max-width: 1330px;
+    height: auto;
+    margin: 0;
+    border: 0;
+  }
+      /* 図の下に置く一行の説明。画像の直後に来たときだけ詰める */
+  .prose .caption {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+  .prose .image-half + .caption,
+  .prose .image-small + .caption,
+  .prose .image-full + .caption,
+  .prose .tree + .caption {
+    margin-top: -8px;
   }
   .prose .image-small {
     margin: 16px 0;
@@ -276,6 +537,18 @@ const { title } = Astro.props;
     border-bottom: none;
     padding-bottom: 0;
     margin: 40px 0 8px;
+  }
+  /* 場面の絵。見出しカードの真上に置く */
+  .prose .phrase-section p:has(img) {
+    margin: 32px 0 0;
+  }
+  .prose .phrase-section p:has(img) img {
+    height: 240px;
+    width: auto;
+    max-width: 100%;
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
   }
   .prose .phrase-section h3 {
     font-size: 20px;
@@ -479,8 +752,15 @@ const { title } = Astro.props;
     font-variant-numeric: tabular-nums;
   }
 
+  .app.nav-closed .main {
+    padding-left: 56px;
+  }
+
   @media (max-width: 800px) {
     .app {
+      grid-template-columns: 1fr;
+    }
+    .app.nav-closed {
       grid-template-columns: 1fr;
     }
     .sidebar {
@@ -520,6 +800,7 @@ const { title } = Astro.props;
 
     .sidebar,
     .phrase-filter,
+    #nav-toggle,
     #img-dialog { display: none !important; }
 
     .app {
