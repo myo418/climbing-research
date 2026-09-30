@@ -62,6 +62,73 @@
 - 外部URL（`https://...`）や `//` で始まる scheme-relative URL は触らない
 - 画像も同じ扱い（`/foo.png` は `BASE/foo.png` に変換される。同フォルダ内画像は `./foo.png` で書く）
 
+## 写真（構図の勉強用）
+
+登っている写真に構図の軸でタグを付けて、絞り込みながら見比べる仕組み。
+
+### 置き場と流れ
+
+```
+public/photos/            ← 原本を放り込む場所。gitignore（1枚20〜70MBあるため）
+public/photos/web/        ← 長辺1600pxに縮小したもの。admin が sips で自動生成。これをコミットする
+src/data/photo-axes.mjs   ← 軸の定義。ここが唯一の定義元
+src/data/photos.json      ← 値。admin が読み書きする
+src/data/photos.ts        ← 上2つをまとめてサイトに渡す型付きラッパ
+scripts/admin.mjs         ← 編集画面のサーバー
+src/pages/design/photos/index.astro ← 一覧（/design/photos/）
+```
+
+1. `public/photos/` に写真を置く
+2. `npm run admin` → <http://127.0.0.1:4701>。起動時に新しい写真を自動で取り込み、`web/` を生成する
+3. 画面でタグを付ける（変更は即 `photos.json` に保存される。← → で移動、数字キーで未入力の軸を埋める）
+4. `npm run build` でサイトに反映
+
+### 付け間違いを直す
+
+値の変更はいつでもできる。選択中のボタンをもう一度押すと外れ、別のボタンを押すと切り替わる。
+
+間違いを**見つける**には、ヘッダの「見直す」の絞り込みを使う。軸の値を1つ選ぶとその値の写真だけが並ぶので、
+まとめて見比べれば浮いているものが分かる。直すとその写真は絞り込みから外れて消え、次の写真に進む。
+「未入力」を選べば、その軸だけ空のものを拾える。
+
+履歴は git が持っている。まとめて戻したいときは `git diff src/data/photos.json` / `git checkout` で戻す。
+
+`public/photos/` から原本を消しても `photos.json` の行は残り、`missing: true` が付くだけ。勝手には消さない。
+
+### クライミングしていない写真を外す
+
+集合写真・書影など、構図の勉強の対象にならない写真は admin の右パネルいちばん上のボタンで
+**除外**にできる。`photos.json` に `excluded: true` が付き、こうなる:
+
+- サイト（`/design/photos/`）に出なくなる（[src/data/photos.ts](src/data/photos.ts) の `photos` が除外済みの配列）
+- admin の一覧からも消える。ヘッダの「除外も表示」で灰色にして呼び戻せる
+- 入力済みの進捗の母数から外れる
+
+タグを消すのではなく除外にする。あとで判断を変えられるし、拾ってきた画像の出典メモも残る。
+
+### 軸を増やす
+
+`src/data/photo-axes.mjs` の `AXES` に足すだけ。admin のボタンもサイトの絞り込みも自動で増える。
+自由記述の項目を増やすときは同ファイルの `FIELDS`。
+
+**ポート 4701** はこのプロジェクトの admin 用。
+`astro dev` は 4700 を使う設定にしてある。
+検証などで2つ目を立てたいときは `ADMIN_PORT=4702 npm run admin`。
+
+**admin は書き換えると自動で再起動する**（`node --watch`）。`scripts/admin.mjs` と、そこから
+import しているファイル（`lineart-gen.mjs` / `photo-axes.mjs` / `lineart-style.mjs`）が対象。
+開いているブラウザも `/api/ping` の起動IDを見て自分で読み込み直すので、手で更新しなくてよい。
+画像を生成している最中に保存すると、その生成は中断される。
+
+**画面の状態は URL に入る。** リロードしても同じ場所に戻り、リンクとして渡せる。
+
+| クエリ | 意味 |
+|---|---|
+| `?tab=photo` / `?tab=lineart` | どちらの画面か |
+| `&id=<写真ID>` | 写真タブで開いている写真 |
+| `&slug=<線画slug>` | 線画タブで開いている絵 |
+| `&c=<案の日時>` | その絵のどの案を見ているか |
+
 ## 動きの可視化（動画）
 
 別リポジトリ `~/git/move-visualizer` が書き出した動画を、サイトに載せられる形に変換して

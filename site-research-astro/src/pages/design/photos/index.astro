@@ -1,0 +1,206 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { photos, FILTER_AXES, AXES, FIELDS, countBy, labelOf } from '../../../data/photos';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const counts = Object.fromEntries(FILTER_AXES.map((a) => [a.key, countBy(a.key)]));
+const tagged = photos.filter((p) => FILTER_AXES.every((a) => p[a.key])).length;
+---
+
+<Layout title="写真">
+  <h1>写真</h1>
+  <p class="meta">{photos.length} 枚 / {tagged} 枚タグ付け済み</p>
+  <p>
+    クライミングの写真に構図の軸でタグを付けて並べたもの。軸を押すと絞り込める。
+    何と何が一緒に写っているとき自分は良いと思っているのか、を見るための場所。
+    自分で撮った写真と、比較用に web から拾ってきた写真が混ざっている。
+    「出どころ」で切り分けられる。拾い画像には出典を付けてある。
+  </p>
+
+  <div class="photo-filter">
+    {FILTER_AXES.map((axis) => (
+      <div class="photo-filter-group">
+        <span class="photo-filter-label">{axis.label}</span>
+        {axis.options.map((o) => (
+          <button
+            class="filter-btn"
+            data-group={axis.key}
+            data-value={o.value}
+            disabled={!counts[axis.key][o.value]}
+          >{o.label}<span class="n">{counts[axis.key][o.value] ?? 0}</span></button>
+        ))}
+      </div>
+    ))}
+    <button id="photo-reset" class="reset">絞り込みを解除</button>
+  </div>
+
+  <p class="meta" id="photo-count"></p>
+
+  <div class="photo-grid">
+    {photos.map((p) => (
+      <figure
+        class="photo-card"
+        data-orientation={p.orientation}
+        {...Object.fromEntries(FILTER_AXES.map((a) => [`data-${a.key}`, p[a.key] ?? '']))}
+      >
+        <a href={`${base}/photos/${p.web}`} target="_blank" rel="noopener">
+          <img src={`${base}/photos/${p.web}`} alt={p.id} loading="lazy" width={p.width} height={p.height} />
+        </a>
+        <figcaption>
+          <div class="photo-tags">
+            {AXES.filter((a) => p[a.key]).map((a) => (
+              <span class={`ptag ptag-${a.key}`}>{labelOf(a.key, p[a.key])}</span>
+            ))}
+          </div>
+          <p class="photo-credit">
+            {[p.location, p.date, p.photographer].filter(Boolean).join(' · ')}
+          </p>
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+</Layout>
+
+<script>
+  const active: Record<string, Set<string>> = {};
+  const cards = [...document.querySelectorAll<HTMLElement>('.photo-card')];
+  const countEl = document.getElementById('photo-count')!;
+
+  function apply() {
+    let shown = 0;
+    for (const card of cards) {
+      const ok = Object.entries(active).every(
+        ([group, values]) => !values.size || values.has(card.dataset[group] ?? ''),
+      );
+      card.style.display = ok ? '' : 'none';
+      if (ok) shown++;
+    }
+    const filtering = Object.values(active).some((s) => s.size);
+    countEl.textContent = filtering ? `${shown} 枚を表示中` : '';
+  }
+
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('.photo-filter .filter-btn')) {
+    btn.addEventListener('click', () => {
+      const { group, value } = btn.dataset as { group: string; value: string };
+      active[group] ??= new Set();
+      const on = btn.dataset.active === 'true';
+      if (on) { active[group].delete(value); delete btn.dataset.active; }
+      else { active[group].add(value); btn.dataset.active = 'true'; }
+      apply();
+    });
+  }
+  document.getElementById('photo-reset')!.addEventListener('click', () => {
+    for (const k of Object.keys(active)) active[k].clear();
+    for (const b of document.querySelectorAll<HTMLElement>('.photo-filter .filter-btn')) delete b.dataset.active;
+    apply();
+  });
+</script>
+
+<style>
+  .photo-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 16px 0 12px;
+    padding: 12px 14px;
+    background: var(--sidebar-bg);
+    border-radius: 10px;
+  }
+  .photo-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .photo-filter-label {
+    font-size: 11px;
+    color: #888;
+    width: 66px;
+    flex-shrink: 0;
+  }
+  .filter-btn {
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    background: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+  .filter-btn:hover:not(:disabled) { opacity: 0.9; }
+  .filter-btn:disabled { opacity: 0.25; cursor: default; }
+  .filter-btn[data-active='true'] {
+    opacity: 1;
+    background: var(--fg);
+    color: var(--bg);
+    border-color: var(--fg);
+  }
+  .filter-btn .n {
+    margin-left: 5px;
+    font-weight: 400;
+    opacity: 0.55;
+    font-size: 11px;
+  }
+  .reset {
+    align-self: flex-start;
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+  }
+
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+    margin-top: 12px;
+  }
+  .photo-card {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .photo-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    border: none;
+    background: #111;
+  }
+  .photo-card figcaption { padding: 8px 10px 10px; }
+  .photo-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .ptag {
+    font-size: 10.5px;
+    padding: 1px 7px;
+    border-radius: 20px;
+    background: #f0f0f0;
+    color: #555;
+    white-space: nowrap;
+  }
+  .ptag-place   { background: #deeaf8; color: #1a4f8a; }
+  .ptag-framing { background: #dff0df; color: #2a6b2a; }
+  .ptag-angle   { background: #f5ead4; color: #7a5200; }
+  .ptag-face    { background: #f0eaff; color: #5a2a9a; }
+  .ptag-rating  { background: #f5dede; color: #8b2020; }
+  .photo-credit {
+    font-size: 11px;
+    color: var(--muted);
+    margin: 5px 0 0;
+  }
+  .photo-credit:empty { display: none; }
+
+  @media print {
+    .photo-filter { display: none; }
+  }
+</style>
