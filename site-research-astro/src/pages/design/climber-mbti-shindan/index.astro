@@ -1,0 +1,266 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import ClimberMbtiCard from '../../../components/ClimberMbtiCard.astro';
+import ClimberMbtiLogo from '../../../components/ClimberMbtiLogo.astro';
+import { questions, choices } from '../../../data/climber-mbti';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Layout title="クライマーMBTI診断">
+  <div class="cm-root">
+  <ClimberMbtiLogo page="診断" />
+
+  <p class="cm-lead">登っているときに自分が実際にどうしているかで答える。</p>
+
+  <section class="cm-quiz" id="cm-quiz">
+    <div class="cm-quiz-head">
+      <span class="cm-quiz-count"><b id="cm-qnum">1</b> / {questions.length}</span>
+      <div class="cm-quiz-bar"><div class="cm-quiz-fill" id="cm-qfill"></div></div>
+    </div>
+
+    {questions.map((q, i) => (
+      <div class="cm-q" data-q={i} hidden={i !== 0}>
+        <p class="cm-q-text">{q.text}</p>
+        <div class="cm-q-choices">
+          {choices.map((c) => (
+            <button class="cm-choice" type="button" data-q={i} data-value={c.value}>{c.label}</button>
+          ))}
+        </div>
+      </div>
+    ))}
+
+    <div class="cm-quiz-foot">
+      <button class="cm-quiz-back" id="cm-back" type="button" disabled>← ひとつ戻る</button>
+    </div>
+  </section>
+
+  <div id="cm-result" hidden>
+    <ClimberMbtiCard label="あなたのタイプ" redo />
+
+    <p class="cm-cta-row">
+      <a class="cm-cta ghost" href={`${base}/design/climber-mbti/`}>
+        <span>16タイプと5軸の説明を見る</span>
+        <span class="cm-cta-arrow" aria-hidden="true">→</span>
+      </a>
+    </p>
+  </div>
+  </div>
+</Layout>
+
+<script>
+  import { initCard } from '../../../scripts/climber-mbti-card';
+  import { questions, tiebreakers } from '../../../data/climber-mbti';
+
+  const card = initCard();
+
+  const answers: number[] = new Array(questions.length).fill(0);
+  let cur = 0;
+
+  const qCards = document.querySelectorAll<HTMLElement>('.cm-q');
+  const qNum = document.getElementById('cm-qnum') as HTMLElement;
+  const qFill = document.getElementById('cm-qfill') as HTMLElement;
+  const backBtn = document.getElementById('cm-back') as HTMLButtonElement;
+  const redoBtn = document.getElementById('cm-redo') as HTMLButtonElement;
+  const quiz = document.getElementById('cm-quiz') as HTMLElement;
+  const result = document.getElementById('cm-result') as HTMLElement;
+
+  function showQuestion(i: number) {
+    cur = i;
+    qCards.forEach((el, n) => {
+      el.hidden = n !== i;
+    });
+    qNum.textContent = String(i + 1);
+    qFill.style.width = `${(i / questions.length) * 100}%`;
+    backBtn.disabled = i === 0;
+  }
+
+  function finish() {
+    const scores = [0, 0, 0, 0, 0];
+    questions.forEach((q, i) => {
+      scores[q.axis] += q.dir === 1 ? answers[i] : -answers[i];
+    });
+
+    const state = scores.map((sc, ax) => {
+      if (sc > 0) return 1;
+      if (sc < 0) return 0;
+      // 同点なら決選問題の答えで向きを決める
+      const qi = questions.findIndex((q) => q.no === tiebreakers[ax]);
+      return answers[qi] > 0 ? questions[qi].dir : 1 - questions[qi].dir;
+    });
+
+    qFill.style.width = '100%';
+    quiz.hidden = true;
+    result.hidden = false;
+    redoBtn.hidden = false;
+    card.setResult(state, scores);
+    result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  document.querySelectorAll<HTMLElement>('.cm-choice').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      answers[Number(btn.dataset.q)] = Number(btn.dataset.value);
+      if (cur < questions.length - 1) showQuestion(cur + 1);
+      else finish();
+    });
+  });
+
+  backBtn.addEventListener('click', () => {
+    if (cur > 0) showQuestion(cur - 1);
+  });
+
+  redoBtn.addEventListener('click', () => {
+    answers.fill(0);
+    quiz.hidden = false;
+    result.hidden = true;
+    redoBtn.hidden = true;
+    card.reset('あなたのタイプ');
+    showQuestion(0);
+    quiz.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+</script>
+
+<style>
+
+  /* ---- リード文とボタン（2ページ共通） ---- */
+  .cm-lead {
+    font-size: clamp(1.0625rem, 2.6vw, 1.375rem);
+    line-height: 1.85;
+    font-weight: 500;
+    max-width: 34em;
+    margin: 0 auto;
+    text-wrap: balance;
+  }
+
+  .cm-cta-row { margin: 3rem 0 3.5rem; }
+  .cm-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--fg);
+    color: var(--bg);
+    border: 1px solid var(--fg);
+    padding: 1.125rem 2.75rem;
+    /* DESIGN.md は基本 角丸なし。押させたいボタンなのでここだけ例外にする */
+    border-radius: 999px;
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 160ms ease, color 160ms ease;
+  }
+  .cm-cta .cm-cta-arrow { font-size: 1.15em; }
+  .cm-cta:hover { background: transparent; color: var(--fg); }
+  .cm-cta:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
+  .cm-cta-arrow { transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1); }
+  .cm-cta:hover .cm-cta-arrow { transform: translateX(4px); }
+
+  /* 結果を見たあとの導線。主ボタンより控えめに、小さく */
+  .cm-cta.ghost {
+    background: transparent;
+    color: var(--fg);
+    border-color: var(--border);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    letter-spacing: 0;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+  }
+  .cm-cta.ghost:hover { border-color: var(--fg); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cm-cta, .cm-cta-arrow { transition: none; }
+  }
+  .lead {
+    font-size: 1.0625rem;
+    line-height: 1.95;
+    color: var(--muted);
+    max-width: 62ch;
+    margin-inline: auto;
+  }
+
+  /* ---- 診断 ---- */
+  .cm-quiz {
+    margin: 2.5rem auto 0;
+    max-width: 640px;
+    border: 1px solid var(--border);
+    background: #fff;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .cm-quiz[hidden] { display: none; }
+
+  .cm-quiz-head { display: flex; flex-direction: column; align-items: center; gap: 0.625rem; }
+  .cm-quiz-count {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .cm-quiz-count b { color: var(--fg); font-size: 1.125rem; }
+  .cm-quiz-bar { width: 100%; height: 2px; background: var(--border); }
+  .cm-quiz-fill { height: 100%; width: 0; background: var(--fg); transition: width 260ms cubic-bezier(0.4, 0, 0.2, 1); }
+
+  .cm-q { display: flex; flex-direction: column; gap: 1.25rem; }
+  .cm-q[hidden] { display: none; }
+  .cm-q-text {
+    font-size: clamp(1.0625rem, 2.6vw, 1.375rem);
+    line-height: 1.7;
+    font-weight: 700;
+    margin: 0;
+    min-height: 3.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cm-q-choices { display: flex; flex-direction: column; gap: 0.5rem; }
+  .cm-choice {
+    appearance: none;
+    font: inherit;
+    font-size: 0.9375rem;
+    background: none;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+  }
+  .cm-choice:hover { border-color: var(--fg); }
+  .cm-choice:active { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+  .cm-choice:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+
+  .cm-quiz-foot { display: flex; justify-content: center; }
+  .cm-quiz-back {
+    appearance: none;
+    font: inherit;
+    font-size: 0.8125rem;
+    background: none;
+    border: 0;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+  }
+  .cm-quiz-back:hover:not(:disabled) { color: var(--fg); }
+  .cm-quiz-back:disabled { opacity: 0.3; cursor: default; }
+
+  .cm-redo {
+    appearance: none;
+    font: inherit;
+    font-size: 0.75rem;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 2px 0.5rem;
+    cursor: pointer;
+  }
+  .cm-redo:hover { color: var(--fg); border-color: var(--fg); }
+  .cm-redo[hidden] { display: none; }
+
+
+
+  #cm-result[hidden] { display: none; }
+</style>

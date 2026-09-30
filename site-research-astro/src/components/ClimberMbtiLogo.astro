@@ -1,0 +1,131 @@
+---
+// クライマーMBTI のロゴ。C M B T I の5文字を色付きのマークで組む。
+// 先頭の C だけ山の形、M B T I は四角。
+// M B T I の4文字には4グループのテープ色をそのまま当てている（色の定義元は climber-mbti.ts の groups）。
+// 先頭の C は Climbing で、グループではないので別の色を持つ。
+import { groups } from '../data/climber-mbti';
+
+interface Props {
+  /** ページの区別。「解説」「診断」など。省略するとロゴだけ */
+  page?: string;
+}
+
+const { page } = Astro.props;
+
+// C は Climbing。4グループのどれでもないので、テープ色とは別の色を当てている。
+// 変えるときはここだけ。M B T I の4色は climber-mbti.ts の groups が定義元。
+const CLIMBING_TAPE = '#4a4458';
+
+const marks = [
+  { letter: 'C', tape: CLIMBING_TAPE, group: 'クライミング' },
+  ...['M', 'B', 'T', 'I'].map((letter, i) => ({
+    letter,
+    tape: groups[i].tape,
+    group: groups[i].jp,
+  })),
+];
+
+const label = `クライマーMBTI${page ?? ''}`;
+---
+
+<h1 class="cm-logo" aria-label={label}>
+  <span class="cm-logo-lockup" aria-hidden="true">
+    <span class="cm-logo-marks">
+      {marks.map((m) => (
+        <span
+          class={`cm-logo-mark${m.letter === 'C' ? ' cm-logo-mark--peak' : ''}`}
+          style={`--tape: ${m.tape}`}
+          title={m.group}
+        >{m.letter}</span>
+      ))}
+    </span>
+    {page && <span class="cm-logo-page">{page}</span>}
+  </span>
+  <span class="cm-logo-sub" aria-hidden="true">Climbing Move–Beta Type Indicator</span>
+</h1>
+
+<style>
+  .cm-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.625rem;
+    margin: 0 0 1rem;
+    line-height: 1;
+  }
+
+  .cm-logo-lockup {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+  }
+
+  .cm-logo-marks {
+    display: flex;
+    gap: 0.25rem;
+    align-items: flex-end;
+  }
+
+  .cm-logo-mark {
+    /* 壁のホールドに見立てた四角。文字は白で抜く */
+    display: grid;
+    place-items: center;
+    width: clamp(1.75rem, 5.6vw, 2.5rem);
+    height: clamp(1.75rem, 5.6vw, 2.5rem);
+    background: var(--tape);
+    color: #fff;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-weight: 700;
+    font-size: clamp(1rem, 3.2vw, 1.5rem);
+    letter-spacing: 0;
+  }
+
+  /* C だけ岩の形。M B T I は四角のまま。
+     下2/3は文字を置く塊のままにして、上の稜線だけで岩に見せている。
+     ロゴの実寸（約40px）では面を増やすと潰れて読めなくなるため。
+     稜線は 主峰 → オーバーハングの切れ込み → コル → 副峰 の非対称。
+     左は上部がわずかに張り出す絶壁、下半分は垂直。
+     DESIGN.md の岩の描き方に合わせ、滑らかな塊ではなく硬い稜線で作っている */
+  .cm-logo-mark--peak {
+    height: clamp(2.5rem, 8vw, 3.5rem);
+    padding-top: clamp(0.75rem, 2.4vw, 1.125rem);
+    clip-path: polygon(
+      26% 0%,
+      40% 12%,
+      33% 22%,
+      58% 26%,
+      74% 18%,
+      100% 38%,
+      100% 100%,
+      0% 100%,
+      0% 44%,
+      9% 30%,
+      2% 16%
+    );
+  }
+
+  .cm-logo-page {
+    /* マークが5色あるので、ここは黒で押さずに落とす */
+    font-size: clamp(1.125rem, 3.6vw, 1.5rem);
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-left: 0.5rem;
+    align-self: flex-end;
+    padding-bottom: 0.125rem;
+  }
+
+  .cm-logo-sub {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: clamp(0.625rem, 1.9vw, 0.8125rem);
+    letter-spacing: 0.22em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 420px) {
+    .cm-logo-page { margin-left: 0; width: 100%; }
+  }
+</style>

@@ -1,0 +1,536 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import ClimberMbtiCard from '../../../components/ClimberMbtiCard.astro';
+import ClimberMbtiLogo from '../../../components/ClimberMbtiLogo.astro';
+import {
+  axes,
+  groups,
+  types,
+  danScale,
+  honors,
+  candidates,
+  criteria,
+  typeIndex,
+  VERDICT_LABELS,
+} from '../../../data/climber-mbti';
+
+const groupTypes = groups.map((g) => ({
+  group: g,
+  members: [0, 1].flatMap((company) =>
+    [0, 1].map((motion) => types[typeIndex(company, motion, g.ground, g.commitment)]),
+  ),
+}));
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const art = (slug: string) => `${base}/climber-mbti/poly/${slug}.webp`;
+---
+
+<Layout title="クライマーMBTI">
+  <div class="cm-root">
+  <ClimberMbtiLogo />
+
+  <p class="cm-cta-row">
+    <a class="cm-cta" href={`${base}/design/climber-mbti-shindan/`}>
+      <span>30問の診断をやってみる</span>
+      <span class="cm-cta-arrow" aria-hidden="true">→</span>
+    </a>
+  </p>
+
+  <ClimberMbtiCard example side />
+
+  <h2 class="cm-tag-head">16 Types</h2>
+
+  <p>
+    場所（岩 / 壁）と熱量（住 / 通）の組み合わせで4つのグループに分かれ、それぞれに4タイプ。
+  </p>
+
+  {groupTypes.map(({ group, members }) => (
+    <section class="cm-group-block" style={`--tape: ${group.tape}`}>
+      <div class="cm-group-head">
+        <span class="cm-group-jp">{group.jp}</span>
+        <span class="cm-group-en">{group.en}</span>
+        <span class="cm-group-key">{group.key}</span>
+      </div>
+      <div class="cm-type-grid">
+        {members.map((t) => (
+          <div class="cm-type">
+            <img class="cm-type-art" src={art(t.slug)} data-slug={t.slug} alt={t.jp} loading="lazy" />
+            <button class="cm-type-code" type="button" data-stem={t.stem}>
+              <span class="kan">{t.stem}◯</span>
+              <span class="let">{t.letters}·</span>
+            </button>
+            <h3>{t.jp}</h3>
+            <p class="cm-type-en">{t.en}</p>
+            <p class="cm-type-body">{t.body}</p>
+            <div class="cm-vars">
+              <p><b>感 Feel</b>{t.feel}</p>
+              <p><b>理 Logic</b>{t.logic}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <h2>5軸</h2>
+
+  <p>
+    並びは知っていく順になっている。1〜2はジムで見ていれば分かり、3〜4は聞けば分かり、
+    5は登りについて話さないと分からない。外から内へのグラデーションで、
+    クライマーが実際に人を知っていく順序と同じ。
+  </p>
+
+  {axes.map((axis) => (
+    <div class="cm-axis">
+      <div class="cm-axis-key">
+        <span class="n">{String(axis.no).padStart(2, '0')}</span>
+        <span class="en">{axis.en}</span>
+      </div>
+      <div class="cm-axis-body">
+        <p class="cm-axis-title">{axis.jp}</p>
+        <div class="cm-poles">
+          {axis.poles.map((p) => (
+            <div class="cm-pole">
+              <img
+                class="cm-pole-art"
+                src={art(`axis-${p.word.toLowerCase()}`)}
+                data-slug={`axis-${p.word.toLowerCase()}`}
+                alt={`${p.kanji} ${p.word}`}
+                loading="lazy"
+              />
+              <span class="cm-pole-head">
+                <span class="kanji">{p.kanji}</span>
+                <span class="word">{p.word}</span>
+                <span class="letter">{p.letter}</span>
+              </span>
+              <span class="desc">{p.desc}</span>
+            </div>
+          ))}
+        </div>
+        <p class="cm-note">{axis.note}</p>
+      </div>
+    </div>
+  ))}
+
+  <h2>のめり込み段位</h2>
+
+  <p>
+    軸4を細かくした表示。二分の粗さをここが補う。頻度だけでは決めない——週2でも引っ越した人は初段、
+    週5でも生活が一切変わっていない人は1級。段位は人生で上下するが、5文字は動かない。
+    判定材料はインタビューで聞く項目（週何回、会員カード何枚、生活の優先順位、やめていた時期、始める前と変わったこと）から取る。
+  </p>
+
+  <div class="cm-scroll">
+    <table class="cm-table">
+      <thead>
+        <tr><th>段位</th><th>Grade</th><th>目安</th><th>状態</th></tr>
+      </thead>
+      <tbody>
+        {danScale.map((d) => (
+          <tr>
+            <td class="rank">{d.jp}</td>
+            <td class="mono">{d.en}</td>
+            <td class="mono">{d.pace}</td>
+            <td>{d.state}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>称号</h2>
+
+  <p>
+    軸に昇格させなかった濃い属性の受け皿。診断結果の上に後から乗る。
+    リスクを軸から外したので、怪我はこの層が引き受ける。
+  </p>
+
+  <div class="cm-chips">
+    {honors.map((h) => (
+      <span class="cm-chip"><b>{h.name}</b>{h.desc}</span>
+    ))}
+  </div>
+
+  <h2>採らなかった軸</h2>
+
+  <p>
+    検討して外した候補と、その理由。「ストイック / 楽しむ」「高グレードを目指す / 楽しむ」「頻度」「熱 / 凪」「整 / 素」は
+    全部ひとつの概念を違う言葉で掴もうとした跡で、最終的に軸4（住 / 通）に収束した。
+    予備は枠が空けば復帰するもの、吸収は別の形でモデルに残ったもの、廃案は使わないもの。
+  </p>
+
+  <div class="cm-scroll">
+    <table class="cm-table">
+      <thead>
+        <tr><th>候補</th><th>内容</th><th>理由</th><th>扱い</th></tr>
+      </thead>
+      <tbody>
+        {candidates.map((c) => (
+          <tr>
+            <td class="pair">{c.pair}</td>
+            <td>{c.what}</td>
+            <td>{c.reason}</td>
+            <td class={`verdict ${c.verdict}`}>{VERDICT_LABELS[c.verdict]}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>軸の条件</h2>
+
+  <p>新しい候補が出たとき、この6つで弾ける。上の不採用はすべてこのどれかに引っかかっている。</p>
+
+  <ol class="cm-criteria">
+    {criteria.map((c) => (
+      <li><b>{c.head}</b>{c.body}</li>
+    ))}
+  </ol>
+  </div>
+</Layout>
+
+<script>
+  import { initCard } from '../../../scripts/climber-mbti-card';
+  initCard();
+</script>
+
+<style>
+  /* 節の頭。グローバルは margin-top 40px だが、
+     このページは節ごとの塊が大きいので、間を空けて区切りを強くする */
+  .cm-root h2 {
+    margin-top: 7rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* カードの Example と同じ貼り紙のような見出し。
+     スタイルの定義元は ClimberMbtiCard.astro の .cm-example */
+  .cm-root h2.cm-tag-head {
+    /* 親が中央揃えなので inline-block だと中央に置かれる。
+       幅を内容に合わせたブロックにして、右マージンを auto にすると左に寄る */
+    display: block;
+    width: fit-content;
+    margin-top: 14rem;
+    margin-bottom: 2rem;
+    margin-left: 0;
+    margin-right: auto;
+    transform: rotate(-3deg);
+    transform-origin: left center;
+    background: var(--fg);
+    color: var(--bg);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 4.4vw, 2.25rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    padding: 0.3em 0.7em 0.36em;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.14);
+    /* グローバルの .prose h2 は下罫線つき。貼り紙には要らない */
+    border-bottom: 0;
+    text-align: left;
+  }
+
+  /* 貼り紙見出しに続く導入文も、見出しの頭に揃えて左に寄せる。
+     1文だけなので小組の幅制限（34em）を外して、1行で収める */
+  .cm-root .cm-tag-head + p {
+    text-align: left;
+    max-width: none;
+    margin-left: 0;
+    margin-right: auto;
+  }
+  /* 幅があるときだけ改行を止める。狭いときは普通に折り返させる */
+  @container (min-width: 720px) {
+    .cm-root .cm-tag-head + p { white-space: nowrap; }
+  }
+
+
+
+
+  /* ---- ボタン ---- */
+
+  .cm-cta-row { margin: 3rem 0 3.5rem; }
+  .cm-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--fg);
+    color: var(--bg);
+    border: 1px solid var(--fg);
+    padding: 1.125rem 2.75rem;
+    /* DESIGN.md は基本 角丸なし。押させたいボタンなのでここだけ例外にする */
+    border-radius: 999px;
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 160ms ease, color 160ms ease;
+  }
+  .cm-cta .cm-cta-arrow { font-size: 1.15em; }
+  .cm-cta:hover { background: transparent; color: var(--fg); }
+  .cm-cta:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
+  .cm-cta-arrow { transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1); }
+  .cm-cta:hover .cm-cta-arrow { transform: translateX(4px); }
+
+  /* 結果を見たあとの導線。主ボタンより控えめに、小さく */
+  .cm-cta.ghost {
+    background: transparent;
+    color: var(--fg);
+    border-color: var(--border);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    letter-spacing: 0;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+  }
+  .cm-cta.ghost:hover { border-color: var(--fg); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cm-cta, .cm-cta-arrow { transition: none; }
+  }
+  .lead {
+    font-size: 1.0625rem;
+    line-height: 1.95;
+    color: var(--muted);
+    max-width: 62ch;
+    margin-inline: auto;
+  }
+
+
+  /* ---- 16 types ---- */
+  .cm-group-block { --tape: var(--border); margin: 2.5rem 0 3.5rem; }
+  .cm-group-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.75rem;
+    border-top: 5px solid var(--tape);
+    padding-top: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .cm-group-jp { font-size: 1.25rem; font-weight: 700; }
+  .cm-group-en {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    color: var(--tape);
+  }
+  .cm-group-key { font-size: 0.8125rem; color: var(--muted); }
+
+  /* 16タイプを4列×4段で見せたいので、このページだけ本文幅を広げる */
+  :global(.prose:has(.cm-root)) { max-width: 1180px; }
+
+  .cm-type-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2rem 1.5rem;
+  }
+  @media (max-width: 1080px) {
+    .cm-type-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 560px) {
+    .cm-type-grid { grid-template-columns: 1fr; }
+  }
+  .cm-type { display: flex; flex-direction: column; align-items: center; gap: 0.375rem; }
+  .cm-type h3 { margin: 0; font-size: 1.125rem; }
+  .cm-type-code {
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .cm-type-code .kan { font-size: 1.375rem; letter-spacing: 0.04em; color: var(--tape); }
+  .cm-type-code .let {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .cm-type-code[aria-current='true'] .kan { text-decoration: underline; text-underline-offset: 4px; }
+  .cm-type-en {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .cm-type-body { margin: 0.25rem 0 0; font-size: 0.875rem; line-height: 1.95; }
+  .cm-vars { border-top: 1px solid var(--border); padding-top: 0.625rem; display: flex; flex-direction: column; gap: 0.25rem; }
+  .cm-vars p { margin: 0; font-size: 0.8125rem; line-height: 1.85; color: var(--muted); }
+  .cm-vars b { color: var(--tape); margin-right: 0.625rem; }
+
+
+  /* ---- axes ---- */
+  .cm-axis {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cm-axis-key { display: flex; align-items: baseline; justify-content: center; gap: 0.5rem; }
+  .cm-axis-key .n {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .cm-axis-key .en {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .cm-axis-body { display: flex; flex-direction: column; align-items: center; gap: 1rem; width: 100%; }
+  .cm-axis-title { margin: 0; font-size: 1.125rem; font-weight: 700; }
+  .cm-poles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; max-width: 760px; width: 100%; margin-inline: auto; }
+  .cm-pole { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .cm-pole-head { display: flex; align-items: baseline; justify-content: center; gap: 0.5rem; }
+  .cm-pole-head .kanji { font-size: 1.375rem; font-weight: 700; }
+  .cm-pole-head .word {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .cm-pole-head .letter {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .cm-pole .desc { font-size: 0.875rem; color: var(--muted); line-height: 1.85; }
+  .cm-note {
+    margin: 0 auto;
+    font-size: 0.8125rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 0.875rem;
+    line-height: 1.9;
+    max-width: 62ch;
+  }
+
+
+  /* ---- tables ---- */
+  .cm-scroll { overflow-x: auto; }
+  .cm-table { border-collapse: collapse; width: 100%; max-width: 900px; min-width: 540px; margin-inline: auto; font-size: 0.875rem; text-align: left; }
+  .cm-table th,
+  .cm-table td {
+    text-align: left;
+    /* グローバルの .prose th/td が四辺に罫線と padding: 6px 12px を掛けている。
+       下罫線だけの表にしたいので、まず border を落としてから引き直す */
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.25rem;
+    vertical-align: top;
+    line-height: 1.75;
+  }
+  /* 表の左右端は本文の縁に揃える */
+  .cm-table th:first-child,
+  .cm-table td:first-child { padding-left: 0; }
+  .cm-table th:last-child,
+  .cm-table td:last-child { padding-right: 0; }
+  .cm-table thead th {
+    /* グローバルの .prose th はグレー地。この表では敷かない */
+    background: none;
+    border-bottom: 2px solid var(--border);
+    font-weight: 500;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .cm-table td.rank { font-size: 1rem; font-weight: 700; white-space: nowrap; }
+  .cm-table td.pair { font-size: 1rem; white-space: nowrap; }
+  .cm-table td.mono {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+  .cm-table td.verdict {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+  .cm-table td.verdict.spare { color: #b08615; }
+  .cm-table td.verdict.absorbed { color: #2f5d86; }
+  .cm-table td.verdict.dropped { color: var(--muted); }
+
+
+  /* ---- chips / criteria ---- */
+  .cm-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+  .cm-chip {
+    font-size: 0.8125rem;
+    border: 1px solid var(--border);
+    padding: 2px 0.75rem;
+    color: var(--muted);
+  }
+  .cm-chip b { color: var(--fg); margin-right: 0.5rem; }
+
+  ol.cm-criteria {
+    list-style: none;
+    counter-reset: c;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem 2.5rem;
+    max-width: 900px;
+    margin-inline: auto;
+  }
+  ol.cm-criteria li {
+    counter-increment: c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.8125rem;
+    color: var(--muted);
+    line-height: 1.85;
+  }
+  ol.cm-criteria li::before {
+    content: counter(c, decimal-leading-zero);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.6875rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  ol.cm-criteria li b { color: var(--fg); font-size: 0.9375rem; }
+
+
+  .cm-type-art {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid var(--border);
+    margin-bottom: 0.25rem;
+  }
+  .cm-pole-art {
+    display: block;
+    width: 100%;
+    max-width: 190px;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid var(--border);
+    margin: 0 auto 0.375rem;
+  }
+
+  @media (max-width: 680px) {
+    .cm-poles { grid-template-columns: 1fr; gap: 1rem; }
+    .cm-axis { gap: 0.5rem; }
+    .cm-group-key { width: 100%; }
+  }
+</style>
