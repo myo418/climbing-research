@@ -1,27 +1,23 @@
-// 「気まずい瞬間」の絵。スタイル文と被写体文の定義元はここ1か所。
+// 「気まずい瞬間」の絵。被写体文の定義元はここ1か所。
+// 色・図形・照明・画角は flat-art.mjs が持つ（「よくある行動」と共有している）。
 //
 // 線画（src/lineart/）とは別系統。線画は顔を描かない規則なので、
 // 気まずさ——ばつの悪い笑い、目をそらす、言い出せない——が伝わらない。
 // ここでは表情を読ませるために、塗りで見せる平面イラストにしている。
 //
-// 出力は public/awkward/<slug>.png と .webp（サイトが読むのは webp）
+// 出力は public/awkward/<slug>.png と .webp / mono/<slug>.webp（サイトが読むのは mono の webp）
 // 生成は `node scripts/awkward-art.mjs`
 
-/** 全図共通のスタイル。絵ごとに書かない */
-export const AWKWARD_STYLE = [
-  'Flat vector editorial illustration. Solid colour fills and clean simple shapes, no outlines except where a thin darker line is needed to separate two shapes of the same tone.',
-  'Stylised human figures with simple proportions and slightly large heads, so the faces read clearly at small size.',
-  'Faces are simple but expressive: dot eyes, visible eyebrows and a single curved line for the mouth, drawn so the feeling is unmistakable — an awkward forced smile, eyes sliding away, a hesitant open mouth, a worried frown. No realism, no detailed features.',
-  'Warm off-white background (#FAFAF8). Muted restrained palette: warm greys, near-black (#1A1A1A) for hair, a single warm skin tone, and small amounts of dusty blue (#5B7C99) and terracotta (#B5654A) used only for clothing, climbing shoes, chalk bags, crash pads and the bolt-on holds.',
-  'Even flat lighting. No gradients, no blur, no drop shadows, no texture, no 3D shading.',
-  'Square composition seen from the side or three-quarters, the whole scene inside the frame with a generous empty margin around it.',
-  'No text, no speech bubbles, no labels, no numbers, no logos, no watermark, no frame, no border.',
-].join(' ');
+import { flatStyle, GYM, WEB_MAX } from './flat-art.mjs';
 
-/** 屋内ジムの場面に足す指示。これが無いと、壁が自然の岩になったり床が地面になる */
-export const GYM = [
-  'The setting is an indoor climbing gym: flat plywood wall panels with a scatter of bolt-on plastic holds screwed on, and thick floor mats below.',
-].join(' ');
+export { GYM, WEB_MAX };
+
+/** 表情の指示。気まずさが伝わらないと絵の意味がなくなるので、ここだけ強く書く */
+const FACES =
+  'Faces are simple but expressive: dot eyes, visible eyebrows and a single curved line for the mouth, drawn so the feeling is unmistakable — an awkward forced smile, eyes sliding away, a hesitant open mouth, a worried frown. No realism, no detailed features.';
+
+/** 全図共通のスタイル。色・画角は flat-art.mjs が持つ。絵ごとに書かない */
+export const AWKWARD_STYLE = flatStyle(FACES);
 
 /**
  * 被写体。英語で、誰が何をしているか・どこから見た絵か・画面に何人入るかまで書く。
@@ -128,6 +124,3 @@ export const SUBJECTS = [
 ];
 
 export const OUT_DIR = 'public/awkward';
-
-/** サイトが読む軽い方。原本の png から作る（`node scripts/awkward-art.mjs --web`） */
-export const WEB_MAX = 900;

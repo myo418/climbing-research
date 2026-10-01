@@ -397,3 +397,73 @@ md から使うときは普通の画像として書く: `![クリンプ](/linear
 
 手本（`REFERENCE_SLUGS`）に指定した図がスタイルの実質的な基準になる。
 描きぶりを変えたいときは、ルール文を増やすより手本を差し替える方が効く。
+
+## カードの絵（気まずい瞬間 / よくある行動）
+
+場面や所作は線画では伝わらない。線画は顔を描かない規則なので、ばつの悪さも「手がどこにあるか」も
+落ちてしまう。**塗りで見せる平面イラストを別系統で持っていて、カード表示のページがこれを読む。**
+
+いまある組は2つ。どちらも同じスタイルを共有しているので、並べても別のサイトの絵に見えない。
+
+| 組 | ページ | 被写体の定義 | 出力 |
+|---|---|---|---|
+| 気まずい瞬間（16枚） | [/communication/consideration/](contents/communication/consideration/index.md) | [src/data/awkward-art.mjs](src/data/awkward-art.mjs) | `public/awkward/` |
+| よくある行動（21枚） | [/communication/common-action/](contents/communication/common-action/index.md) | [src/data/common-action-art.mjs](src/data/common-action-art.mjs) | `public/common-action/` |
+
+```
+src/data/flat-art.mjs             ← 色・図形・照明・画角。2つの組で共有する唯一の定義元
+src/data/<組>-art.mjs             ← 表情の指示と被写体文。組ごとに違うのはここだけ
+scripts/flat-art-gen.mjs          ← 生成と webp 作りの処理。入口から呼ばれる
+scripts/<組>-art.mjs              ← 入口。どの組を渡すか決めるだけ
+public/<組>/<slug>.png            ← 原本
+public/<組>/<slug>.webp           ← 色つき（いまはページから呼んでいない）
+public/<組>/mono/<slug>.webp      ← 白黒。**サイトが読むのはこれ**
+```
+
+```bash
+node scripts/common-action-art.mjs                # 全部（既にあるものは飛ばす）
+node scripts/common-action-art.mjs fist-bump      # slug を指定して1枚だけ
+node scripts/common-action-art.mjs --force <slug> # 描き直す（課金される）
+node scripts/common-action-art.mjs --web          # 生成せず webp だけ作り直す
+node scripts/common-action-art.mjs --mono         # 白黒版だけ作り直す
+```
+
+既にある png は飛ばすので、途中で止めてもう一度回しても二重に課金されない。
+1枚 $0.039（Gemini 2.5 Flash）。21枚で $0.82。
+
+### md 側の書き方
+
+カードは `<div class="situation">` の中に**画像1枚・H3・本文**をこの順で置く。
+画像は必ず先頭。見出し（`jp`）は md の H3 と一致させる（ずれると対応が追えなくなる）。
+
+```markdown
+<div class="situation">
+
+![グータッチ](/common-action/mono/fist-bump.webp)
+
+### グータッチ <span class="easy">気軽</span>
+
+課題を完登したときや、惜しいトライのあとに交わす拳のタッチ。……
+
+</div>
+```
+
+見た目は [src/layouts/Layout.astro](src/layouts/Layout.astro) の `.phrase-section .situation`
+（左に正方形の絵200px、右に見出しと説明。700px以下では縦積み）。
+
+### 効いた言い回し・効かなかった言い回し
+
+線画の表（上）に加えて、この系統で実際に出た失敗:
+
+| | 書き方 | 結果 |
+|---|---|---|
+| ✓ | 「Only two people appear.」を毎回書く | 頼んでいない人物が増えない |
+| ✗ | 手元だけの寄りで「no head, no torso」に否定語を足しすぎる | かえって人物が2人生えた（指皮を削る図） |
+| ✓ | 手が2つ要る寄りは、諦めて座った1人の場面にする | 安定して出る |
+| ✗ | ノートや記録帳を描かせる | 「文字を描くな」と書いても読めそうな表が出る |
+| ✓ | 「遠くて読めない筆記体のような数本の線。文字も罫線も行もない」 | 字に見えない書き込みになる |
+| ✗ | ホールドを「a bolt-on hold」とだけ書く | 輪郭のない塊になる |
+| ✓ | 「上面と下側の持ち縁を持つホールド」 | ブラシがどこに当たっているか分かる |
+
+隅に文字の染みや透かしのようなものが出ることがある。スタイル文に `no watermark` は入っているが
+完全には効かない。**出たら `--force <slug>` で引き直す**（1枚 $0.04）。

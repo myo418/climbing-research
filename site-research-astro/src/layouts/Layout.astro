@@ -538,18 +538,6 @@ const { title, fullscreen = false, narrow = false, imageHeight, imageSide = fals
     padding-bottom: 0;
     margin: 40px 0 8px;
   }
-  /* 場面の絵。見出しカードの真上に置く */
-  .prose .phrase-section p:has(img) {
-    margin: 32px 0 0;
-  }
-  .prose .phrase-section p:has(img) img {
-    height: 240px;
-    width: auto;
-    max-width: 100%;
-    margin: 0;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-  }
   .prose .phrase-section h3 {
     font-size: 20px;
     font-weight: 400;
@@ -578,6 +566,81 @@ const { title, fullscreen = false, narrow = false, imageHeight, imageSide = fals
     color: var(--muted);
     font-size: 13px;
     line-height: 1.6;
+  }
+  /* 場面のカード。左に正方形の絵、右に見出しと説明。
+     絵はカードの縁まで出す（内側に余白を作らない） */
+  .prose .phrase-section .situation {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    align-content: center;
+    margin: 16px 0 0;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .prose .phrase-section .situation p:has(img) {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: stretch;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+  }
+  .prose .phrase-section .situation img {
+    display: block;
+    width: 200px;
+    height: 100%;
+    min-height: 200px;
+    object-fit: cover;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
+  .prose .phrase-section .situation h3 {
+    grid-column: 2;
+    grid-row: 1;
+    display: block;
+    margin: 0;
+    padding: 18px 20px 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    font-size: 18px;
+  }
+  .prose .phrase-section .situation h3 + p {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0;
+    padding: 6px 20px 18px;
+    background: none;
+    border: none;
+    border-radius: 0;
+  }
+  /* 画面が狭いときは絵を上に積む */
+  @media (max-width: 700px) {
+    .prose .phrase-section .situation {
+      grid-template-columns: 1fr;
+    }
+    .prose .phrase-section .situation p:has(img) {
+      grid-column: 1;
+      grid-row: 1;
+    }
+    .prose .phrase-section .situation img {
+      width: 100%;
+      height: 200px;
+    }
+    .prose .phrase-section .situation h3 {
+      grid-column: 1;
+      grid-row: 2;
+      padding: 14px 16px 0;
+    }
+    .prose .phrase-section .situation h3 + p {
+      grid-column: 1;
+      grid-row: 3;
+      padding: 6px 16px 16px;
+    }
   }
   .prose .phrase-section .easy,
   .prose .phrase-section .normal,
