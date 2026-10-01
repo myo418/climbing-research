@@ -381,6 +381,14 @@ const { title, fullscreen = false, narrow = false, imageHeight, imageSide = fals
     height: 100%;
     object-fit: cover;
   }
+  /* 切り抜かれると困る図版（Tシャツの版下など）を並べるとき。image-row に足す */
+  .prose .image-row.fit > p {
+    aspect-ratio: auto;
+  }
+  .prose .image-row.fit img {
+    height: auto;
+    object-fit: contain;
+  }
   @media (max-width: 600px) {
     .prose .image-row {
       grid-template-columns: 1fr;
