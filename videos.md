@@ -75,6 +75,7 @@ iframe埋め込みかhls.jsが要る。**保護が要らないものにStreamを
 | ポイントライト（黒地に白点） | 16 | `r2` | `move-visualizer/pointlight/C05xx.mp4` | 埋め込み済 |
 | シルエット | 16 | `r2` | `move-visualizer/silhouette/C05xx.mp4` | 埋め込み済 |
 | 16本並べた一覧（点・影 各1） | 2 | `r2` | `move-visualizer/grid/grid_4x4*.mp4` | 埋め込み済 |
+| 元映像（幅1280・60fps） | 16 | `r2` | `move-visualizer/original/C05xx.mp4` | 埋め込み済 |
 | 元映像を並べたもの（`grid_original_*`） | 4 | — | — | 保留 |
 
 元動画（計147MB）も、H.264に変換した25MBぶんも**リポジトリに入れない**。
@@ -87,21 +88,18 @@ iframe埋め込みかhls.jsが要る。**保護が要らないものにStreamを
 載せるなら本人の許諾を取ってから。変換スクリプトの `EXCLUDE` で弾いている。
 **R2は公開バケットなので、出すことになってもR2ではなくStreamに置く。**
 
-### 元動画の置き場
+### 元映像の置き場
 
-元動画は Google Drive にある。
+`~/git/move-visualizer/original/` に84本（22GB）。2026-10-01にGoogle Photosから77本を落とし、
+足りない7本（C0604・C0606・C0609〜C0613）をGoogle Driveから降ろして揃えた。
+控えは Drive の `マイドライブ/武蔵野美術大学/卒業制作/move-visualizer/original/` にあり、
+そちらは131本（C0598〜C0738、39.2GB）。**手元のものは作業用で、実体はDriveにある。**
 
-```
-~/Library/CloudStorage/GoogleDrive-<アカウント>/マイドライブ/
-  武蔵野美術大学/卒業制作/move-visualizer/original/
-```
+可視化に使った16本（C0598〜C0613）は全部そろっている。
 
-131本（C0598〜C0738）で計39.2GB。可視化に使ったのはそのうち16本（C0598〜C0613、3.3GB）。
-
-**ストリーミング状態なので実体はまだ手元に無い**（`ls` はサイズを出すが `du` は 0B）。
-使うときは Finder で「オフラインで使用可能にする」を選んで降ろす。
-`~/git/move-visualizer/` 側の `original/` は処理後に消してあり、残っているのは
-`clipped/C0612.mp4`（1本だけ切り出したもの）と `output/grid_original_*`（4本）。
+切り出しはしていない。元映像とポイントライトの長さが完全に一致する（差0.00秒）ので、
+**クリップ版＝元映像そのもの**。唯一の例外が `clipped/C0612.mp4` で、これは224MBの元映像から
+19.1秒を切り出したもの。その元映像は未取得。
 
 ## 参考動画（外部作品 / 引用）
 

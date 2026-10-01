@@ -6,6 +6,12 @@ import { url } from '../../../lib/url';
 const grid = moveGrids.find((g) => g.id === 'grid_4x4');
 const gridSilhouette = moveGrids.find((g) => g.id === 'grid_4x4_silhouette');
 const hasSilhouette = moveClips.some((c) => c.silhouette);
+const hasOriginal = moveClips.some((c) => c.original);
+const KINDS = [
+  { key: 'pointlight', label: 'ポイントライト' },
+  { key: 'silhouette', label: 'シルエット' },
+  { key: 'original', label: '元映像' },
+] as const;
 const seconds = Math.round(moveVideos.filter((v) => v.kind === 'pointlight').reduce((n, v) => n + v.duration, 0));
 ---
 
@@ -28,6 +34,10 @@ const seconds = Math.round(moveVideos.filter((v) => v.kind === 'pointlight').red
     どこで止まってどこで一気に動いたかという時間の配分が前に出てくる。
     同じ課題でも、静かに乗り込む人と振り込んで止める人では点の流れ方がまるで違う。
   </p>
+  <p>
+    点・影・元映像の3つを同じクリップで切り替えられる。
+    元映像で壁やホールドを確かめてから点に戻ると、さっきまで読めなかった動きが読めることがある。
+  </p>
 
   {[grid, gridSilhouette].filter(Boolean).map((g) => (
     <section class="mv-hero">
@@ -49,23 +59,38 @@ const seconds = Math.round(moveVideos.filter((v) => v.kind === 'pointlight').red
     </section>
   ))}
 
-  {hasSilhouette && (
+  {(hasSilhouette || hasOriginal) && (
     <div class="mv-switch" role="group" aria-label="表示の切り替え">
-      <button type="button" data-kind="pointlight" class="is-on" aria-pressed="true">ポイントライト</button>
-      <button type="button" data-kind="silhouette" aria-pressed="false">シルエット</button>
+      {KINDS.filter((k) =>
+        k.key === 'pointlight' || (k.key === 'silhouette' ? hasSilhouette : hasOriginal),
+      ).map((k) => (
+        <button
+          type="button"
+          data-kind={k.key}
+          class={k.key === 'pointlight' ? 'is-on' : undefined}
+          aria-pressed={k.key === 'pointlight' ? 'true' : 'false'}
+        >{k.label}</button>
+      ))}
     </div>
   )}
 
   <div class="mv-grid">
     {moveClips.map((clip) => (
       <figure class="mv-card">
-        {(['pointlight', 'silhouette'] as const).map((kind) => {
-          const v = clip[kind];
-          return v ? (
+        {KINDS.map(({ key, label }) => {
+          const v = clip[key];
+          // 元映像が手元に無いクリップがある。切り替えたときに何も無いと壊れて見えるので、
+          // 代わりに一言置いておく
+          if (!v) {
+            return key === 'original' ? (
+              <p class="mv-missing" data-kind={key} hidden>元映像は未取得</p>
+            ) : null;
+          }
+          return (
             <video
               class="mv-video"
-              data-kind={kind}
-              hidden={kind === 'silhouette'}
+              data-kind={key}
+              hidden={key !== 'pointlight'}
               src={url(v.src)}
               poster={url(v.poster)}
               width={v.width}
@@ -75,8 +100,9 @@ const seconds = Math.round(moveVideos.filter((v) => v.kind === 'pointlight').red
               muted
               playsinline
               preload="none"
+              aria-label={`${clip.id} ${label}`}
             ></video>
-          ) : null;
+          );
         })}
         <figcaption>
           <strong>{clip.id}</strong>
@@ -98,11 +124,11 @@ const seconds = Math.round(moveVideos.filter((v) => v.kind === 'pointlight').red
         b.classList.toggle('is-on', on);
         b.setAttribute('aria-pressed', String(on));
       });
-      document.querySelectorAll<HTMLVideoElement>('.mv-video').forEach((v) => {
-        const show = v.dataset.kind === kind;
+      document.querySelectorAll<HTMLElement>('.mv-video, .mv-missing').forEach((el) => {
+        const show = el.dataset.kind === kind;
         // 隠れた側が鳴り続けないよう止めてから切り替える
-        if (!show && !v.paused) v.pause();
-        v.hidden = !show;
+        if (el instanceof HTMLVideoElement && !show && !el.paused) el.pause();
+        el.hidden = !show;
       });
     });
   });
@@ -192,9 +218,21 @@ const seconds = Math.round(moveVideos.filter((v) => v.kind === 'pointlight').red
     display: block;
   }
   /* display の指定がブラウザ標準の [hidden] を上書きしてしまうので、打ち消す。
-     これが無いとポイントライトとシルエットが両方出る */
-  .mv-card video[hidden] {
+     これが無いと種別が全部まとめて出る */
+  .mv-card video[hidden],
+  .mv-missing[hidden] {
     display: none;
+  }
+  /* 元映像が無いクリップの置き場。動画と同じ大きさの枠にして、並びが崩れないようにする */
+  .mv-missing {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 3 / 4;
+    margin: 0;
+    background: #111;
+    color: #777;
+    font-size: 12px;
   }
   .mv-card figcaption {
     display: flex;

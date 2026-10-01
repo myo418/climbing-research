@@ -42,17 +42,25 @@ const PREFIX = 'move-visualizer';
 // 可視化を通していない素材なのでサイトには出さない。載せるなら本人の許諾が要る。
 const EXCLUDE = /^grid_original_/;
 
-/** 種別ごとの変換設定。ポイントライトは中身が軽いので等倍のまま、実写が残るものは幅を落とす */
+/**
+ * 種別ごとの変換設定。ポイントライトは中身が軽いので等倍のまま。
+ * `scale` は幅を指定する。縦位置のクリップが混ざる種別では `box` を使う——
+ * 幅で指定すると 1080x1920 が 1280x2276 に引き伸ばされてしまうため。
+ */
 const PROFILES = {
-  pointlight: { crf: 26, preset: 'slow', scale: null },
+  pointlight: { crf: 26, preset: 'slow' },
   silhouette: { crf: 28, preset: 'medium', scale: 720 },
-  grid: { crf: 26, preset: 'slow', scale: null },
+  grid: { crf: 26, preset: 'slow' },
+  // 元映像はカメラ出しのまま（実測 51.6Mbps）なので落とし幅が大きい。
+  // 点の動きと見比べるものなので 60fps は保つ
+  original: { crf: 24, preset: 'slow', box: 1280 },
 };
 
 const LABELS = {
   pointlight: 'ポイントライト',
   silhouette: 'シルエット',
   grid: '一覧',
+  original: '元映像',
 };
 
 function ffprobe(file) {
@@ -68,7 +76,13 @@ function ffprobe(file) {
 }
 
 function encode(src, dest, profile) {
-  const vf = profile.scale ? ['-vf', `scale=${profile.scale}:-2`] : [];
+  // box は縦横どちらが長くてもその中に収める。decrease なので元より大きくならない
+  const filter = profile.box
+    ? `scale=w=${profile.box}:h=${profile.box}:force_original_aspect_ratio=decrease:force_divisible_by=2`
+    : profile.scale
+      ? `scale=${profile.scale}:-2`
+      : null;
+  const vf = filter ? ['-vf', filter] : [];
   execFileSync('ffmpeg', [
     '-y', '-v', 'error',
     '-i', src,
@@ -136,6 +150,19 @@ function collect() {
     for (const f of fs.readdirSync(silDir).sort()) {
       const m = f.match(/^(C\d+)_silhouette\.mp4$/);
       if (m) jobs.push({ kind: 'silhouette', id: m[1], src: path.join(silDir, f) });
+    }
+  }
+
+  // 元映像は output/ の隣の original/ にある。手元には可視化していないものも多数あるので、
+  // ポイントライトが出来ているクリップだけを載せる
+  const origDir = path.join(SRC, '..', 'original');
+  if (fs.existsSync(origDir)) {
+    const visualized = new Set(jobs.filter((j) => j.kind === 'pointlight').map((j) => j.id));
+    for (const f of fs.readdirSync(origDir).sort()) {
+      const m = f.match(/^(C\d+)\.MP4$/i);
+      if (m && visualized.has(m[1])) {
+        jobs.push({ kind: 'original', id: m[1], src: path.join(origDir, f) });
+      }
     }
   }
   return jobs;

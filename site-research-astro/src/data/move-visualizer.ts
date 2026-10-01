@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-export type MoveVideoKind = 'pointlight' | 'silhouette' | 'grid';
+export type MoveVideoKind = 'pointlight' | 'silhouette' | 'grid' | 'original';
 
 export interface MoveVideo {
   kind: MoveVideoKind;
@@ -20,11 +20,13 @@ export interface MoveVideo {
   bytes: number;
 }
 
-/** 同じクリップのポイントライトとシルエットを組にしたもの */
+/** 同じクリップのポイントライト・シルエット・元映像を組にしたもの */
 export interface MoveClip {
   id: string;
   pointlight?: MoveVideo;
   silhouette?: MoveVideo;
+  /** 可視化を通していない元の映像。手元に無いクリップもあるので、揃わないことがある */
+  original?: MoveVideo;
   duration: number;
 }
 
@@ -45,7 +47,7 @@ export const moveClips: MoveClip[] = (() => {
   for (const v of moveVideos) {
     if (v.kind === 'grid') continue;
     const clip = byId.get(v.id) ?? { id: v.id, duration: 0 };
-    clip[v.kind as 'pointlight' | 'silhouette'] = v;
+    clip[v.kind as 'pointlight' | 'silhouette' | 'original'] = v;
     clip.duration = Math.max(clip.duration, v.duration);
     byId.set(v.id, clip);
   }
