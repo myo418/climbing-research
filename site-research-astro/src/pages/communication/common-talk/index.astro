@@ -1,5 +1,7 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
+import { rand, cardShape } from '../../../lib/card-paper';
+import { layoutClusters } from '../../../lib/card-cluster';
 import {
   phrases,
   SECTIONS,
@@ -10,53 +12,343 @@ import {
 } from '../../../data/phrases';
 
 const bySection = new Map(SECTIONS.map((s) => [s, phrases.filter((p) => p.section === s)]));
+
+// カード表示。ジャンルで箱を分けず、1枚の面に全部を散らす。
+// ジャンルごとに塊（クラスター）を作り、塊の中心付近は詰まって外側はまばらになる。
+// 座標はビルド時に決める（src/lib/card-cluster.ts）。画面幅で組み直さないので、
+// 拡大縮小してもカードの位置は変わらない。
+// 札の形は /design/voices/ と同じ（src/lib/card-paper.ts）。
+const H = 160;
+// 裏は字が多いので、表より少しだけ大きく取る（上下左右にこれだけはみ出す）
+const BACK_BLEED = 22;
+
+const board = layoutClusters(
+  SECTIONS.map((section, gi) => ({
+    key: section,
+    // 見出しの文字が占める場所。ここを空けて、周りにカードを寄せる
+    hole: { w: section.length * 34 + 84, h: 56 },
+    items: (bySection.get(section) ?? []).map((p, i) => {
+      const s = gi * 137 + i * 11 + 1;
+      // 正方形に近い形。幅だけ1枚ずつ変える
+      const w = Math.round(150 + rand(s + 11) * 38);
+      // 長いフレーズほど小さく出す。大きいままだと語の途中で折れる
+      const n = p.phrase.length;
+      const fs = n <= 5 ? 20 : n <= 8 ? 17 : n <= 12 ? 15 : 13;
+      // 裏の説明は長さがまちまち（20〜130字）。札に収まる字の大きさを1枚ずつ出す。
+      // 1行に入る字数 ≒ 幅/字、行数 ≒ 高さ/(字×行送り) なので、
+      // 入る字数 = 幅×高さ / (字² × 行送り)。これが説明の長さ以上になる字を選ぶ
+      // 最後の行は埋まりきらないし、折り返しでも隙間が出るので、8割しか入らないものとして見る
+      const room = (w + BACK_BLEED * 2 - 48) * (H + BACK_BLEED * 2 - 48) * 0.8;
+      const fsBack = Math.max(8, Math.min(14, Math.floor(Math.sqrt(room / (1.7 * p.description.length)))));
+      return {
+        p,
+        w,
+        h: H,
+        fs,
+        fsBack,
+        section,
+        path: cardShape(s, w, H),
+        tilt: (rand(s + 101) * 14 - 7).toFixed(2),
+      };
+    }),
+  })).filter((g) => g.items.length > 0),
+  { spread: 160, pad: 50, between: 56, headroom: 0, columns: 5 },
+);
+
+const anchorList = board.clusters.map((c, i) => ({
+  id: `talk-${i}`,
+  section: c.key,
+  count: c.cards.length,
+  cx: c.cx,
+  cy: c.cy,
+  tilt: (rand(i * 17 + 5) * 7 - 3.5).toFixed(2),
+}));
 ---
 
 <Layout title="よくある会話">
-  <h1>よくある会話</h1>
-  <p class="meta">{phrases.length} フレーズ</p>
-
-  <div class="phrase-filter">
-    <div class="phrase-filter-group">
-      <span class="phrase-filter-label">関係値</span>
-      {(Object.entries(RELATIONSHIP_LABELS) as [RelationshipTag, string][]).map(([key, label]) => (
-        <button class={`filter-btn ${key}`} data-group="relationship" data-value={key}>{label}</button>
-      ))}
-    </div>
-    <div class="phrase-filter-group">
-      <span class="phrase-filter-label">頻出度</span>
-      {(Object.entries(FREQUENCY_LABELS) as [FrequencyTag, string][]).map(([key, label]) => (
-        <button class={`filter-btn ${key}`} data-group="frequency" data-value={key}>{label}</button>
-      ))}
+  <div class="bar">
+    <h1>よくある会話</h1>
+    <p class="meta">{phrases.length} フレーズ</p>
+    <div class="view-toggle" role="group" aria-label="表示の切り替え">
+      <button class="view-btn" type="button" data-view="list" aria-pressed="true">一覧</button>
+      <button class="view-btn" type="button" data-view="card" aria-pressed="false">カード</button>
     </div>
   </div>
 
-  <div class="phrase-section">
-    {SECTIONS.map((section) => {
-      const items = bySection.get(section) ?? [];
-      if (items.length === 0) return null;
-      return (
-        <>
-          <h2 data-section={section}>{section}</h2>
-          {items.map((p) => (
-            <>
-              <h3 data-relationship={p.relationship} data-frequency={p.frequency}>
-                {p.phrase}
-                <span class="tags">
-                  <span class={p.relationship}>{RELATIONSHIP_LABELS[p.relationship]}</span><span class={p.frequency}>{FREQUENCY_LABELS[p.frequency]}</span>
-                </span>
-              </h3>
-              <p>{p.description}</p>
-            </>
-          ))}
-        </>
-      );
-    })}
+  <div class="list-view" data-view-panel="list">
+    <div class="phrase-filter">
+      <div class="phrase-filter-group">
+        <span class="phrase-filter-label">関係値</span>
+        {(Object.entries(RELATIONSHIP_LABELS) as [RelationshipTag, string][]).map(([key, label]) => (
+          <button class={`filter-btn ${key}`} data-group="relationship" data-value={key}>{label}</button>
+        ))}
+      </div>
+      <div class="phrase-filter-group">
+        <span class="phrase-filter-label">頻出度</span>
+        {(Object.entries(FREQUENCY_LABELS) as [FrequencyTag, string][]).map(([key, label]) => (
+          <button class={`filter-btn ${key}`} data-group="frequency" data-value={key}>{label}</button>
+        ))}
+      </div>
+    </div>
+
+    <div class="phrase-section">
+      {SECTIONS.map((section) => {
+        const items = bySection.get(section) ?? [];
+        if (items.length === 0) return null;
+        return (
+          <>
+            <h2 data-section={section}>{section}</h2>
+            {items.map((p) => (
+              <>
+                <h3 data-relationship={p.relationship} data-frequency={p.frequency}>
+                  {p.phrase}
+                  <span class="tags">
+                    <span class={p.relationship}>{RELATIONSHIP_LABELS[p.relationship]}</span><span class={p.frequency}>{FREQUENCY_LABELS[p.frequency]}</span>
+                  </span>
+                </h3>
+                <p>{p.description}</p>
+              </>
+            ))}
+          </>
+        );
+      })}
+    </div>
+  </div>
+
+  <div class="card-view" data-view-panel="card" hidden>
+    <div class="card-tools">
+      <nav class="anchor-nav" aria-label="ジャンルへ移動">
+        {anchorList.map((a) => (
+          <button type="button" class="anchor-link" data-target={a.id}>{a.section}</button>
+        ))}
+      </nav>
+      <div class="zoom" role="group" aria-label="拡大縮小">
+        <button type="button" data-zoom="out" aria-label="縮小">−</button>
+        <button type="button" data-zoom="fit" aria-label="全体を表示">全体</button>
+        <button type="button" data-zoom="in" aria-label="拡大">＋</button>
+      </div>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="cloud" id="cloud" style={`width:${board.width}px;height:${board.height}px`}>
+        {anchorList.map((a) => (
+          <span
+            class="anchor"
+            data-anchor={a.id}
+            data-section={a.section}
+            style={`left:${a.cx}px;top:${a.cy}px;--tilt:${a.tilt}deg`}
+          >
+            <span class="anchor-label">{a.section}</span>
+            <span class="anchor-n">{a.count}</span>
+          </span>
+        ))}
+        {board.clusters.flatMap((c) => c.cards).map((item) => (
+          <button
+            class={`talk-card ${item.p.relationship}`}
+            type="button"
+            aria-expanded="false"
+            style={`left:${Math.round(item.x)}px;top:${Math.round(item.y)}px;--w:${item.w}px;--fs:${item.fs}px;--fsb:${item.fsBack}px;--tilt:${item.tilt}deg`}
+            data-section={item.section}
+          >
+            <span class="flip">
+              <span class="face front">
+                <svg class="paper" viewBox={`0 0 ${item.w} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+                  <path d={item.path} />
+                </svg>
+                <span class="text">{item.p.phrase}</span>
+              </span>
+              <span class="face back">
+                <svg class="paper" viewBox={`0 0 ${item.w} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+                  <path d={item.path} />
+                </svg>
+                <span class="story">{item.p.description}</span>
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+    <p class="hint">ドラッグで動かす / ホイールで拡大縮小 / カードを押すと裏の説明が読める</p>
   </div>
 </Layout>
 
 <script>
 (function () {
+  /* ---- 表示の切り替え ---------------------------------------------------
+     カード表示のときだけ、ページ自体をスクロールしない全画面にする
+     （Layout の .app.fullscreen）。一覧は普通のページのままにする。 */
+  const VIEW_KEY = 'common-talk-view';
+  const app = document.querySelector<HTMLElement>('.app');
+  const panels = document.querySelectorAll<HTMLElement>('[data-view-panel]');
+  const viewBtns = document.querySelectorAll<HTMLButtonElement>('.view-btn');
+
+  function setView(view: string) {
+    panels.forEach((el) => { el.hidden = el.dataset.viewPanel !== view; });
+    viewBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+    app?.classList.toggle('fullscreen', view === 'card');
+    try { localStorage.setItem(VIEW_KEY, view); } catch {}
+    if (view === 'card') requestAnimationFrame(home);
+  }
+
+  viewBtns.forEach((btn) => btn.addEventListener('click', () => setView(btn.dataset.view!)));
+
+  /* ---- 面の拡大縮小と移動 ----------------------------------------------
+     面（.cloud）の大きさはビルド時に決めてあるので、画面の大きさで
+     組み直さない。見え方は transform だけで変える。 */
+  const stage = document.getElementById('stage')!;
+  const cloud = document.getElementById('cloud')!;
+  const MAX = 2.5;
+  // 最初に出す場所と倍率。全体を引きで出すと字が読めないので、
+  // いちばん大きいジャンルに寄った状態から始める
+  const HOME_SECTION = '登りかたについて';
+  const HOME_ZOOM = 0.7;
+  let z = 1;
+  let tx = 0;
+  let ty = 0;
+  let zFit = 1;
+
+  const apply = () => { cloud.style.transform = `translate(${tx}px, ${ty}px) scale(${z})`; };
+
+  /** 面がまるごと入る倍率。全体表示の下限にもなる */
+  function measureFit(): number {
+    const sw = stage.clientWidth;
+    const sh = stage.clientHeight;
+    const cw = cloud.offsetWidth;
+    const ch = cloud.offsetHeight;
+    if (!sw || !sh || !cw || !ch) return zFit;
+    return Math.min(sw / cw, sh / ch);
+  }
+
+  /** 面がまるごと入る倍率にして、真ん中に置く */
+  function fit() {
+    const cw = cloud.offsetWidth;
+    const ch = cloud.offsetHeight;
+    if (!cw || !ch) return;
+    zFit = measureFit();
+    z = zFit;
+    tx = (stage.clientWidth - cw * z) / 2;
+    ty = (stage.clientHeight - ch * z) / 2;
+    apply();
+  }
+
+  /** そのジャンルの見出しを画面の真ん中に持ってくる */
+  function centerOn(el: HTMLElement, zoom: number) {
+    z = Math.max(zFit, Math.min(MAX, zoom));
+    tx = stage.clientWidth / 2 - (el.offsetLeft + el.offsetWidth / 2) * z;
+    ty = stage.clientHeight / 2 - (el.offsetTop + el.offsetHeight / 2) * z;
+    apply();
+  }
+
+  /** 最初の見え方に戻す */
+  function home() {
+    zFit = measureFit();
+    const el = cloud.querySelector<HTMLElement>(`.anchor[data-section="${HOME_SECTION}"]`);
+    if (!el) { fit(); return; }
+    centerOn(el, HOME_ZOOM);
+  }
+
+  /** 画面上の一点 (px, py) を動かさずに倍率を変える */
+  function zoomAt(next: number, px: number, py: number) {
+    const clamped = Math.max(zFit, Math.min(MAX, next));
+    if (clamped === z) return;
+    tx = px - ((px - tx) * clamped) / z;
+    ty = py - ((py - ty) * clamped) / z;
+    z = clamped;
+    apply();
+  }
+
+  const center = () => [stage.clientWidth / 2, stage.clientHeight / 2] as const;
+
+  document.querySelectorAll<HTMLButtonElement>('.zoom button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const kind = btn.dataset.zoom;
+      if (kind === 'fit') { fit(); return; }
+      const [cx, cy] = center();
+      zoomAt(kind === 'in' ? z * 1.35 : z / 1.35, cx, cy);
+    });
+  });
+
+  stage.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const r = stage.getBoundingClientRect();
+    zoomAt(z * (e.deltaY < 0 ? 1.12 : 1 / 1.12), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+
+  // ドラッグで動かす。カードの上から始めたときは、押したのか引いたのか
+  // 分からないので、少し動いた時点で初めて移動として扱う
+  let drag: { x: number; y: number; tx: number; ty: number; moved: boolean } | null = null;
+
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    drag = { x: e.clientX, y: e.clientY, tx, ty, moved: false };
+  });
+
+  stage.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x;
+    const dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 4) return;
+    if (!drag.moved) { drag.moved = true; stage.setPointerCapture(e.pointerId); stage.dataset.dragging = 'true'; }
+    tx = drag.tx + dx;
+    ty = drag.ty + dy;
+    apply();
+  });
+
+  const endDrag = () => { delete stage.dataset.dragging; };
+  stage.addEventListener('pointerup', (e) => {
+    const moved = drag?.moved ?? false;
+    drag = null;
+    endDrag();
+    if (moved) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+  stage.addEventListener('pointercancel', () => { drag = null; endDrag(); });
+
+  window.addEventListener('resize', () => {
+    if (document.querySelector<HTMLElement>('.card-view')!.hidden) return;
+    // 画面の大きさが変わると全体表示の倍率も変わる。今の見え方は保つ
+    zFit = measureFit();
+    if (z < zFit) { z = zFit; apply(); }
+  });
+
+  /* ---- ジャンルへ移動。その札が画面の左上あたりに来るよう寄せる ---- */
+  document.querySelectorAll<HTMLButtonElement>('.anchor-link').forEach((link) => {
+    link.addEventListener('click', () => {
+      const el = cloud.querySelector<HTMLElement>(`[data-anchor="${link.dataset.target}"]`);
+      if (el) centerOn(el, Math.max(z, HOME_ZOOM));
+    });
+  });
+
+  /* ---- カードを裏返す。開くのは一度に1枚だけ ---- */
+  const closeAll = () => {
+    cloud.querySelectorAll<HTMLButtonElement>('.talk-card[aria-expanded="true"]').forEach((c) => {
+      c.setAttribute('aria-expanded', 'false');
+    });
+  };
+
+  cloud.querySelectorAll<HTMLButtonElement>('.talk-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const open = card.getAttribute('aria-expanded') === 'true';
+      closeAll();
+      if (open) return;
+      card.setAttribute('aria-expanded', 'true');
+      // 全体表示のままだと裏の文字が小さすぎて読めないので、その札に寄る
+      if (z < 0.9) {
+        const [cx, cy] = center();
+        zoomAt(0.9, cx, cy);
+        tx = cx - (card.offsetLeft + card.offsetWidth / 2) * z;
+        ty = cy - (card.offsetTop + card.offsetHeight / 2) * z;
+        apply();
+      }
+    });
+  });
+
+  stage.addEventListener('click', (e) => {
+    if (!(e.target as HTMLElement).closest('.talk-card')) closeAll();
+  });
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(); });
+
+  /* ---- 一覧の絞り込み ---- */
   const active: { relationship: string | null; frequency: string | null } = {
     relationship: null,
     frequency: null,
@@ -100,14 +392,26 @@ const bySection = new Map(SECTIONS.map((s) => [s, phrases.filter((p) => p.sectio
       h2.style.display = anyVisible ? '' : 'none';
     });
   }
+
+  // 前に選んだ表示で始める
+  try {
+    const saved = localStorage.getItem(VIEW_KEY);
+    if (saved === 'card') setView('card');
+  } catch {}
 })();
 </script>
 
 <style>
+  .bar {
+    flex: none;
+  }
+  .bar h1 {
+    margin-bottom: 4px;
+  }
   .meta {
     color: var(--muted);
     font-size: 13px;
-    margin: -12px 0 24px;
+    margin: 0 0 14px;
   }
   .phrase-section h3 .tags {
     display: inline-flex;
@@ -116,5 +420,249 @@ const bySection = new Map(SECTIONS.map((s) => [s, phrases.filter((p) => p.sectio
   }
   .phrase-section h3 .tags > span:last-child {
     margin-left: -6px;
+  }
+
+  /* 全画面のときは、上の見出しだけ余白を詰める */
+  :global(.app.fullscreen) .bar {
+    padding: 14px 20px 0;
+  }
+  :global(.app.fullscreen) .bar h1 {
+    font-size: 20px;
+  }
+
+  /* ---- 表示の切り替え ---- */
+  .view-toggle {
+    display: inline-flex;
+    margin: 0 0 16px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .view-btn {
+    padding: 6px 18px;
+    border: 0;
+    background: var(--bg);
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .view-btn + .view-btn {
+    border-left: 1px solid var(--border);
+  }
+  .view-btn[aria-pressed='true'] {
+    background: var(--sidebar-bg);
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  /* ---- カード表示 ---- */
+  .card-view {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px 10px;
+  }
+  .card-tools {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 8px;
+  }
+  .anchor-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .anchor-link {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--muted);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .anchor-link:hover {
+    color: var(--fg);
+    background: var(--sidebar-bg);
+  }
+  .zoom {
+    display: inline-flex;
+    flex: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .zoom button {
+    min-width: 34px;
+    padding: 4px 10px;
+    border: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .zoom button + button {
+    border-left: 1px solid var(--border);
+  }
+  .zoom button:hover {
+    background: var(--sidebar-bg);
+  }
+
+  .stage {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    cursor: grab;
+    touch-action: none;
+  }
+  .stage[data-dragging] {
+    cursor: grabbing;
+  }
+  .hint {
+    flex: none;
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  /* 面。1枚ずつ座標で置く */
+  .cloud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+  }
+
+  /* ジャンルの札。カードの流れの中に挟まって、後ろに同じジャンルが続く */
+  /* ジャンルの見出し。枠は付けず、文字だけを塊の上に置く */
+  .anchor {
+    position: absolute;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 12px;
+    /* left/top は塊の中心。文字の幅ぶん左へ戻して中央に置く */
+    transform: translate(-50%, -50%) rotate(var(--tilt));
+    white-space: nowrap;
+    z-index: 2;
+  }
+  .anchor-label {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .anchor-n {
+    font-size: 18px;
+    color: var(--muted);
+  }
+
+  /* 札。高さは全枚共通で、表と裏はまったく同じ大きさ・同じ形 */
+  .talk-card {
+    position: absolute;
+    width: var(--w);
+    height: 160px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    perspective: 1000px;
+  }
+  .flip {
+    display: block;
+    position: relative;
+    height: 100%;
+    transform: rotate(var(--tilt));
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  /* 裏は字が多いので、返したときに1.5倍にして読めるようにする */
+  .talk-card[aria-expanded='true'] .flip {
+    transform: rotateY(180deg) scale(1.5);
+  }
+  .talk-card[aria-expanded='true'] {
+    z-index: 5;
+  }
+  .face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 20px;
+    backface-visibility: hidden;
+  }
+  .paper {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+  }
+  /* 札の色は関係値で変える。一覧のタグと同じ意味 */
+  .talk-card { --c: #8a8a84; }
+  .talk-card.easy { --c: #5f8d63; }
+  .talk-card.normal { --c: #c08a2e; }
+  .talk-card.hard { --c: #b5654a; }
+  .talk-card.solo { --c: #7b7f8c; }
+
+  .paper path {
+    fill: color-mix(in srgb, var(--c) 13%, #fafaf8);
+    stroke: color-mix(in srgb, var(--c) 34%, #fafaf8);
+    stroke-width: 1;
+    transition: fill 0.15s, stroke 0.15s;
+  }
+  .back .paper path {
+    fill: color-mix(in srgb, var(--c) 62%, #141414);
+    stroke: color-mix(in srgb, var(--c) 80%, #141414);
+  }
+  .front {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  /* 裏は説明が入るので、表より一回り大きい面にする */
+  .back {
+    inset: -22px;
+    transform: rotateY(180deg);
+    justify-content: center;
+    padding: 24px 26px;
+    color: #fff;
+  }
+  .talk-card:hover .front .paper path {
+    fill: color-mix(in srgb, var(--c) 22%, #fafaf8);
+    stroke: color-mix(in srgb, var(--c) 58%, #fafaf8);
+  }
+  .talk-card:focus-visible .face {
+    outline: 2px solid color-mix(in srgb, var(--c) 70%, #1a1a1a);
+    outline-offset: 2px;
+  }
+
+  .text {
+    font-size: var(--fs);
+    line-height: 1.35;
+    letter-spacing: 0.02em;
+    word-break: auto-phrase;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+  .story {
+    font-size: var(--fsb);
+    line-height: 1.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flip { transition: none; }
   }
 </style>
